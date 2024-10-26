@@ -1,0 +1,15 @@
+{% extends 'base.njk' %}
+{% block content %}
+
+<h1> Scribbles </h1>
+
+{%- for scribble in collections.scribble | reverse -%}
+  <p id="{{ scribble.page.url }}" class="bold italic"> 
+    <a class="text" href="#{{ scribble.page.url }}"> {{ scribble.page.date | date }} </a>
+  </p>
+
+  {{ scribble.content | safe }}
+
+  <hr />
+{%- endfor -%}
+{% endblock %}

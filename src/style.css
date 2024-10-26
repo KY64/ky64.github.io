@@ -1,0 +1,86 @@
+:root {
+  color-scheme: light dark;
+}
+
+/* There is an alternative using light-dark()
+ * but it's a new feature which old browser
+ * does not support
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark
+ */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #FFE2B7;
+    --font-color: #3C3B3B;
+    --link-color: #0004DB;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #393646;
+    --font-color: #E3E3E3;
+    --link-color: #75E6FF;
+  }
+}
+
+a {
+  color: var(--link-color);
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--font-color);
+  font-family: serif;
+  margin: 20pt auto;
+  width: 620px;
+  font-size: 14pt;
+}
+
+h1, h2 {
+  font-weight: normal;
+}
+
+header {
+  margin-bottom: 2.4em;
+  font-size: 12pt;
+}
+
+nav > ul {
+  display: flex;
+  margin-left: -29pt;
+}
+
+nav > ul > li {
+  margin: 0 16pt 0 0;
+  list-style-type: none;
+}
+
+#logo {
+  font-size: 20pt;
+  font-weight: bold;
+}
+
+#blogs {
+  margin-left: -41px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.font-sans-serif {
+  font-family: sans-serif;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.no-style {
+  list-style-type: none;
+}
+
+.text {
+  color: var(--font-color);
+}
+

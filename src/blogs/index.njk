@@ -1,0 +1,14 @@
+{% extends 'base.njk' %}
+{% block content %}
+
+<h1> Blogs </h1>
+{%- for blog in collections.blog | reverse -%}
+  <ul id="blogs" class="no-style">
+    <li>
+      <a class="bold" href="{{ blog.page.url }}">{{ blog.data.title }}</a>
+      <div style="margin-top: 3pt">{{ blog.data.date | date }}</div>
+    </li>
+  </ul>
+{%- endfor -%}
+
+{% endblock %}
