@@ -36,7 +36,6 @@ jobs:
           cache-dependency-path: ./package-lock.json
       - name: Build pages
         run: npm i && npm run build
-        working-directory: ./_site
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - id: upload-artifact
