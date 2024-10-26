@@ -9,17 +9,17 @@
  */
 @media (prefers-color-scheme: light) {
   :root {
-    --bg-color: #FFE2B7;
-    --font-color: #3C3B3B;
-    --link-color: #0004DB;
+    --bg-color: #ffe2b7;
+    --font-color: #3c3b3b;
+    --link-color: #0004db;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-color: #393646;
-    --font-color: #E3E3E3;
-    --link-color: #75E6FF;
+    --font-color: #e3e3e3;
+    --link-color: #75e6ff;
   }
 }
 
@@ -34,9 +34,11 @@ body {
   margin: 20pt auto;
   width: 620px;
   font-size: 14pt;
+  line-height: 1.72em;
 }
 
-h1, h2 {
+h1,
+h2 {
   font-weight: normal;
 }
 
@@ -84,3 +86,10 @@ nav > ul > li {
   color: var(--font-color);
 }
 
+@media only screen and (max-width: 650px) {
+  body {
+    font-size: 13pt;
+    margin: 20pt 10pt;
+    width: auto;
+  }
+}
