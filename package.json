@@ -1,0 +1,16 @@
+{
+  "name": "ky64.github.io",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "eleventy",
+    "dev": "eleventy --serve"
+  },
+  "private": true,
+  "keywords": [],
+  "author": "KY64",
+  "license": "MIT",
+  "dependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}
