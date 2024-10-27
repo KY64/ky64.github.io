@@ -11,6 +11,7 @@
   "author": "KY64",
   "license": "MIT",
   "dependencies": {
-    "@11ty/eleventy": "^3.0.0"
+    "@11ty/eleventy": "^3.0.0",
+    "clean-css": "^5.3.3"
   }
 }

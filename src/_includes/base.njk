@@ -1,16 +1,23 @@
 <!DOCTYPE html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> {{title}} </title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  {% include 'header.njk' %}
-  <main>
-  {% block content %} {# Render custom HTML content #}
-    {{ content | safe }} {# Render markdown #}
-  {% endblock %} 
-  </main>
-  <footer></footer>
-</body>
+<html lang="en"
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{description}}">
+    <title> {{title}} </title>
+    {% set css %} {% include "style.css" %} {% endset %}
+    <style>
+      {{ css | cssmin | safe }}
+    </style>
+    <link rel="stylesheet" href="/css/mobile.css" media="(max-width: 650px)">
+  </head>
+  <body>
+    {% include 'header.njk' %}
+    <main>
+    {% block content %} {# Render custom HTML content #}
+      {{ content | safe }} {# Render markdown #}
+    {% endblock %} 
+    </main>
+    <footer></footer>
+  </body>
+</html>
