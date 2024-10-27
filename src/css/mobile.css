@@ -1,0 +1,8 @@
+@media only screen and (max-width: 650px) {
+  body {
+    font-size: 13pt;
+    margin: 20pt 10pt;
+    width: auto;
+  }
+}
+
