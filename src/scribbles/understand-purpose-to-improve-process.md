@@ -10,4 +10,4 @@ what problems it was designed to solve, and what compromises were
 made among opposing pressures."_
 
 A snippet above is from the following article which is an interesting read
-https://medium.com/@gordon.messmer/if-you-dont-understand-its-purpose-you-can-t-improve-the-process-4e48260c3887?source=user_profile_page---------5-------------a850bf885958---------------
+[https://medium.com/@gordon.messmer/if-you-dont-understand-its-purpose-you-can-t-improve-the-process-4e48260c3887?source=user_profile_page---------5-------------a850bf885958---------------](https://medium.com/@gordon.messmer/if-you-dont-understand-its-purpose-you-can-t-improve-the-process-4e48260c3887?source=user_profile_page---------5-------------a850bf885958---------------)
