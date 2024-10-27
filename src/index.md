@@ -1,5 +1,7 @@
 ---
 layout: base.njk
+title: KY|MIND
+description: Thoughts, learning processes and experiences of one software engineer who keeps contemplating whether every problem needs technology to solve it.
 ---
 
 # Projects

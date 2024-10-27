@@ -34,7 +34,7 @@ body {
   margin: 20pt auto;
   width: 620px;
   font-size: 14pt;
-  line-height: 1.72em;
+  line-height: 1.56;
 }
 
 h1,
@@ -84,12 +84,4 @@ nav > ul > li {
 
 .text {
   color: var(--font-color);
-}
-
-@media only screen and (max-width: 650px) {
-  body {
-    font-size: 13pt;
-    margin: 20pt 10pt;
-    width: auto;
-  }
 }
