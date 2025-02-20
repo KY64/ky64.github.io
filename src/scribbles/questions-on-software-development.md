@@ -1,6 +1,6 @@
 ---
 tags: scribble
-date: 2024-02-20
+date: 2025-02-20
 ---
 
 A good resource on thinking about problems in software development.
