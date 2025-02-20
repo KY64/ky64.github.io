@@ -1,3 +1,8 @@
+---
+tags: scribble
+date: 2024-02-20
+---
+
 A good resource on thinking about problems in software development.
 [https://www.youtube.com/watch?v=HgKf9HLRRKs](https://www.youtube.com/watch?v=HgKf9HLRRKs)
 
