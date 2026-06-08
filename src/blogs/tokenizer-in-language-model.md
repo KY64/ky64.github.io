@@ -46,9 +46,10 @@ This separation happens because its vocabulary does not have word "impossibly" b
 "impossible". So it can only tell "imposs" is 1 token. Why just "imposs" ? Let's define token
 as __*a series of character*__ first. Which sounds like "word" but unlikely true as we know it.
 
-The tokenizer vocabulary is unlike a common English dictionary. It may look like this
+The tokenizer vocabulary is unlike a common English dictionary. It may look like this:
 
 - im
+- imp
 - impo
 - impos
 - imposs
@@ -56,8 +57,12 @@ The tokenizer vocabulary is unlike a common English dictionary. It may look like
 - possibly
 - ibly
 
-Weird, huh? Well, that is also interesting since when recognizing the word "impossibly" it breaks down
-into "i-m-p-o-s-s-i-b-l-y"
+Weird, huh? Well, that is also interesting since when it is looking into the word "impossibly", it breaks down
+into "i-m-p-o-s-s-i-b-l-y" first. After that, it starts to pair each character then look back into vocabulary for
+reference. Say, we pair "i-m" to be "im" then check the vocabulary, if it exists, continue to pair
+"imp" then check again, keep going until it is unable to find the token in vocabulary. Hence it stops
+at "imposs" then consider it as 1 token since "imposs" exists in the vocabulary. So that is how tokenizer
+works and why 1 token is not always 1 word. _It depends_.
 
 ## The Long Journey Of Stressful Discovery
 
