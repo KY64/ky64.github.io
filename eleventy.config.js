@@ -5,6 +5,7 @@ export default function (eleventyConfig) {
   eleventyConfig.addFilter("cssmin", (code) => 
     new CleanCSS({level: 2}).minify(code).styles);
   eleventyConfig.addPassthroughCopy("src/css/mobile.css");
+  eleventyConfig.addPassthroughCopy("src/images");
   eleventyConfig.addNunjucksFilter(
     "date",
     (date) => new Date(date).toISOString().split("T")[0],
