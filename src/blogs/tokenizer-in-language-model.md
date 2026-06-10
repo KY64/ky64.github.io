@@ -94,7 +94,7 @@ has 5 tokens although it has 4 words? There are several questions that I was try
 
 ### Talking About Data
 
-When facing with this questions, my intuition tell me it all leads into one thing. Data. The most underrated and
+When facing with these questions, my intuition tell me it all leads into one thing. Data. The most underrated and
 boring thing to work on yet AI need it the most. I've often heard about the [importance](https://www.turingpost.com/p/cvhistory6)
 of data when building an AI, so I try to make the tiniest dataset for the sake of experiment.
 
@@ -161,7 +161,7 @@ so it can easily blend the flavor. Yes, I mean it. We need to break it down into
 teaching the tokenizer to spell a word first. Like "real" is "r-e-a-l". So what we have to do is breaking down
 this dataset into words, then into characters.
 
-#### 1. Break down into words
+#### 1. Break Down Into Words
 
 Let's break down this sentence into words:
 
@@ -171,7 +171,7 @@ becomes
 
 > `["that"; "is"; "not"; "impossible"]`
 
-#### 2. Break down into characters
+#### 2. Break Down Into Characters
 
 After that we break the words into characters
 
@@ -301,37 +301,147 @@ after training process is done. The merge rules could look like this (trimmed fo
 ("impos", "s")
 ```
 
-this merge rules would be more obvious once we reach the encoding part to test the tokenizer. Here is the figure
-to summarise the previous steps.
+the usage of this merge rules would be more obvious once we reach the encoding part to test the tokenizer. Here
+is the figure to summarise the previous steps.
 
 ![Tokenizer training step](/images/tokenizer-in-language-model/training-step.png)
 
-#### 7. Token ID
+#### 6. Token ID
 
 Every token in the vocabulary has an ID. Say when "th" is added into the vocabulary, it can have ID like 12 or
 anything. It is up to us how to set the ID. For simplicity, I just used the list index as ID. As long as the ID
 is unique for each token, it should work. So the vocabulary looks like this:
 
 ```
-r -> 9
-s -> 10
-t -> 11
-th -> 12
-u -> 13
-v -> 14
+r = 9
+s = 10
+t = 11
+th = 12
+u = 13
+v = 14
 ```
 
-#### 6. Expected Vocabulary Size
+#### 7. Expected Vocabulary Size
 
-The training process also needs to know when to end. It can be done by check the graph of the vocabulary size which
+The training process also needs to know when to end. It can be done by checking the graph of the vocabulary size which
 if the size doesn't grow after some iterations, it should end the training. However, for simplicity, we can set
 the parameter the size of the vocabulary, whether it is 30, 50, etc. It could be higher means more words but
 this is depends on the dataset. If the dataset has only limited words, the tokenizer is only as good as the dataset.
-Once the vocabulary size reached, the training ends and it means we have created a tokenizer model. The next step would
-be to test it.
+Once the vocabulary size reached, the training ends and it means we have created a tokenizer model. In other words,
+the model is a list of learned tokens, hence called "vocabulary".
 
 ### Encoding
 
+After training a tokenizer model, the next step is to test it by transforming a sentence into tokens. Which means,
+it needs to be able to transform 
+
+> _"You are impossibly real"_ 
+
+into 
+
+> `[you] [are] [imposs] [ibly] [real]` 
+
+like the example tokenizer. For this case, the output will the **token ID** which map to the vocabulary.
+
+The encoding step follows the same steps like the training. It breaks down sentence into word then into characters.
+However, it doesn't create a new vocabulary but it looks into vocabulary for any known words. It is like testing
+your memory about english terms.
+
+#### 1. Transform Inputs
+
+When it gets the input, it will transform the input into
+
+```ocaml
+[
+  ["y"; "o"; "u"];
+  ["a"; "r"; "e"];
+  ["i"; "m"; "p"; "o"; "s"; "s"; "i"; "b"; "l"; "y"];
+  ["r"; "e"; "a"; "l"]
+]
+```
+
+If you wonder why not just matching the word to vocabulary, that was also my question. Apparently this is why
+BPE is interesting. Remember about dictionary analogy? When a word does not exist in the dictionary, how could
+it recognises the word then? So instead of using the word by word, it starts from character by character, then
+token by token.
+
+#### 2. Merge Rules
+
+For refreshment, merge rules is a guide for how to reconstruct token. If it is faced with characters "y-o-u",
+the rules will guide to merge "y-o" first then "yo-u". If it is still confusing why tokenizer has merge rules
+and vocabulary. Let's start to encode the first index, `["y"; "o"; "u"]` as input.
+
+Suppose the tokenizer vocabulary is
+
+```
+u = 13
+o = 19
+y = 20
+yo = 22
+you = 33
+```
+
+The ID is not deterministic, I assign it randomly just for example. So how the tokenizer knows which token ID to
+use from the vocabulary? Will the input encoded to `[20; 19; 13]` or `[33]` or `[22; 13]` ?
+
+All of them are correct but can we make the tokenizer to choose `[33]` instead? This is where merge rules can be
+useful. So instead of directly check the vocabulary, it will first check the merge rules.
+
+When checking the merge rules, the tokenizer will create pair of the characters first, just like it did during
+training. So it will try to create this pair first
+
+```
+[("y", "o")]
+```
+
+Then try to find in the merge rules how to merge this pair, if the pair exists in the merge rules, then it will merge it.
+For example the merge rules are
+
+```
+[("a", "r")]
+[("y", "o")]
+[("yo", "u")]
+```
+
+As we can see above, the merge rules tell the it should merge `[("y", "o")]` so it will merge it first into "yo"
+after that it will create a new pair
+
+```
+[("yo", "u")]
+```
+
+Then check again in the merge rule, does it exist? Yes, so it will merge it into "you". Now, after merging all
+the pairs, it is now checking the vocabulary whether token "you" exist then assigning the token ID. Hence, the
+word "you" is transformed into `[33]`.
+
+What about the case on "imposs" and "ibly" ? Remember that merge rules is not just a list of character pair.
+It is a list of __*most frequent*__ pair. What causes the word "impossibly" counted as 2 tokens here is because
+of 3 possible factors:
+
+1. In the dataset, the pair `[("impos", "s")]` and `[("ibl", "y")]` are frequently appears hence it is added in the merge rules.
+While `[("impossibl", "y")]` and `[("impossib", "l")]` pairs are not frequent enough.
+2. The dictionary size set to limited number, so it may requires more training.
+3. The word "impossibly" itself is not frequently appears in dataset.
+
+#### 3. Transform to Token ID
+
+The final step on encoding is transforming based on its token ID in the vocabulary. So the end result would look like
+
+```
+[33; 4; 29; 24; 44]
+```
+
+Assuming the vocabulary is
+
+```
+you = 33
+are = 4
+imposs = 29
+ibly = 24
+real = 44
+```
+
+### Final Answers
 
 <br />
 <br />
