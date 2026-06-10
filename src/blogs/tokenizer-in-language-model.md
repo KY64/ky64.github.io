@@ -239,7 +239,7 @@ we get the following result
 - `("h", "a")` appears 3 times
 
 in this case we need to pick the most frequent, what happen if they both have the same frequency? Order matters.
-It will pick what got counted first. Since we started counting from `("t", "h")` then it will be the one that is
+It will pick what got counted first. Since we started counting from `("t", "h")` then it will be the one that gets
 merged. After merging it to become `"th"`, this merged pair is included in vocabulary. Previously our vocabulary
 looks like this (trimmed for simplicity)
 
@@ -266,6 +266,71 @@ v
 ---
 ```
 
+#### 4. New Pair
+
+Once the pair is merged, the characters `["t"; "h"; "a"; "t"]` is evolved into `["th"; "a"; "t"]`. This happens
+because "th" frequently match with characters in the dataset. So every pair which frequently appears will be
+merged until it ends up becoming a subword or even a word, it depends on the frequency in the dataset. The new
+pair would eventually looks like this
+
+```
+("th", "a")
+```
+
+This will go through the same steps like before to check if "tha" frequently appear in datasets.
+
+#### 5. Merge Rules
+
+There is one thing that is special to BPE, it is called "Merge Rules" which is a guidance for the tokenizer
+to reconstruct a token. Everytime a pair is merged, it will be added into merge rules. Say if we just merged
+`("t", "h")` then the merge rules will have
+
+```
+("t", "h")
+```
+
+after training process is done. The merge rules could look like this (trimmed for simplicity)
+
+```
+("t", "h")
+("i", "s")
+("i", "m")
+("im", "p")
+("imp", "o")
+("impo", "s")
+("impos", "s")
+```
+
+this merge rules would be more obvious once we reach the encoding part to test the tokenizer. Here is the figure
+to summarise the previous steps.
+
+![Tokenizer training step](/images/tokenizer-in-language-model/training-step.png)
+
+#### 7. Token ID
+
+Every token in the vocabulary has an ID. Say when "th" is added into the vocabulary, it can have ID like 12 or
+anything. It is up to us how to set the ID. For simplicity, I just used the list index as ID. As long as the ID
+is unique for each token, it should work. So the vocabulary looks like this:
+
+```
+r -> 9
+s -> 10
+t -> 11
+th -> 12
+u -> 13
+v -> 14
+```
+
+#### 6. Expected Vocabulary Size
+
+The training process also needs to know when to end. It can be done by check the graph of the vocabulary size which
+if the size doesn't grow after some iterations, it should end the training. However, for simplicity, we can set
+the parameter the size of the vocabulary, whether it is 30, 50, etc. It could be higher means more words but
+this is depends on the dataset. If the dataset has only limited words, the tokenizer is only as good as the dataset.
+Once the vocabulary size reached, the training ends and it means we have created a tokenizer model. The next step would
+be to test it.
+
+### Encoding
 
 
 <br />
