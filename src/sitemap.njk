@@ -1,0 +1,17 @@
+---
+permalink: sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{%- for blog in collections.blog %}
+  {%- if blog.url and blog.outputPath and blog.outputPath.endsWith('.html') and blog.data.sitemap !== false %}
+  <url>
+    <loc>{{ site.url }}{{ blog.url }}</loc>
+    {%- if blog.date %}
+    <lastmod>{{ blog.date | date }}</lastmod>
+    {%- endif %}
+  </url>
+  {%- endif %}
+{%- endfor %}
+</urlset>

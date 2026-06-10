@@ -4,7 +4,7 @@ title: KY|MIND
 description: Thoughts, learning processes and experiences of one software engineer who keeps contemplating whether every problem needs technology to solve it.
 ---
 
-# Projects
+## Projects
 
 These are the least that I could share publicly:
 
@@ -15,7 +15,7 @@ These are the least that I could share publicly:
   when generating more than hundred of images.
 - **[Python Trace ID Logger](https://github.com/KY64/correlation-logger)**: Python logging with trace ID support
 
-# Contact Info
+## Contact Info
 
 - Email: [exceldaris _[at]_ tuta _[dot]_ io](#)
 - GitHub: [https://github.com/KY64](https://github.com/KY64)

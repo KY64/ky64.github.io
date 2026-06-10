@@ -1,6 +1,7 @@
 ---
 layout: 'base.njk'
 title: Why 1 Token Is Not Exactly 1 Word In Language Model?
+description: An exploration of why language model tokens do not map one-to-one with words, using a small BPE tokenizer experiment.
 tags: blog
 date: 2026-06-09
 ---
