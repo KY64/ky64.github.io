@@ -443,6 +443,25 @@ real = 44
 
 ### Final Answers
 
+So that is how tokenizer works. Though it is not a perfect BPE but at least I get the idea of how tokenizer
+works. Let's answer our initial questions:
+
+- Why the other words are fully highlighted in one color but the word "impossibly" has 2 highlight colors?
+> _Because during training the word "impossibly" is not frequently appears and the tokens
+> "imposs" and "ibly" are more frequent_
+- Was the tokenizer "reading" by character or by syllable?
+> _It breaks down into characters then merging it to build a token based on merge rules_
+- Was the word "impossibly" not recognised as an English word by the tokenizer?
+> _It may exist in the dataset but not end up in the vocabulary since it is less frequent_
+- What "imposs" and "ibly" mean for the tokenizer?
+> _It means the token "imposs" and "ibly" are frequently appears in the dataset so it is included in the
+> vocabulary_
+
+It is a long journey. As I finish this article, a more sophisticated frontier model has released a while ago,
+[Claude Fable 5](https://www.anthropic.com/news/claude-fable-5-mythos-5). Yet whatever the model is, the step
+to build an AI model still the same. Hence I learn the basic principle and fundamental truth to understand
+how to build a custom model.
+
 <br />
 <br />
 <br />
