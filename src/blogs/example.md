@@ -3,7 +3,7 @@ permalink: false
 eleventyExcludeFromCollections: true
 ---
 //---
-//layout: 'base.njk'
+//layout: 'blog.njk'
 //title: My blog
 //description: Short summary of the post for search results and link previews.
 //tags: blog

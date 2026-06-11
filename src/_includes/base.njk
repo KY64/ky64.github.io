@@ -23,9 +23,11 @@
   <body>
     {% include 'header.njk' %}
     <main>
-    {% block content %} {# Render custom HTML content #}
-      {{ content | safe }} {# Render markdown #}
-    {% endblock %} 
+    {% block main %}
+      {% block content %} {# Render custom HTML content #}
+        {{ content | safe }} {# Render markdown #}
+      {% endblock %}
+    {% endblock %}
     </main>
     <footer></footer>
     <script>

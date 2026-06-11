@@ -1,5 +1,5 @@
 ---
-layout: 'base.njk'
+layout: 'blog.njk'
 title: Why 1 Token Is Not Exactly 1 Word In Language Model?
 description: An exploration of why language model tokens do not map one-to-one with words, using a small BPE tokenizer experiment.
 tags: blog
@@ -462,7 +462,3 @@ It is a long journey. As I finish this article, a more sophisticated frontier mo
 [Claude Fable 5](https://www.anthropic.com/news/claude-fable-5-mythos-5). Yet whatever the model is, the step
 to build an AI model still the same. Hence I learn the basic principle and fundamental truth to understand
 how to build a custom model.
-
-<br />
-<br />
-<br />
