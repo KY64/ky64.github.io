@@ -194,8 +194,8 @@ Uh-oh. It works. The file _is_ written outside the respective skill directory. T
 [ -f ~/OH_MY_FILE.md ] && echo "File exists!"
 ```
 
-shows that if the file exists, it will print "File exists!" otherwise it prints nothing. Our second assumption was wrong.
-The skill files can be written _outside_ the respective skill directory. We found an issue.
+shows that if the file exists, it will print "File exists!" otherwise it prints nothing. However, apparently my second
+assumption was wrong. The skill files can be written _outside_ the respective skill directory. We found an issue.
 
 Yet at what costs? Remember that in the source code we looked before, it creates a file by calling `writeFile`
 from Node.JS `fs` [library](https://nodejs.org/api/fs.html#fspromiseswritefilefile-data-options). It doesn't just
@@ -325,7 +325,7 @@ function validateImportedSkillFilePath(filePath: string): string {
 ```
 
 The function rejects any input like `../../../file` or even `skill/../../../../file`, and so on.
-Though this require a lot of check, it ensures that the Agent File has a valid skill filepath since
+Although this require a lot of check, it ensures that the Agent File has a valid skill filepath since
 during writing a skill file, the function potentially overwrite existing file. Hence we must be very careful
 treating the skill filepath as input.
 
