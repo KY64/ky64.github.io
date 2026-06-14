@@ -111,6 +111,34 @@ pre code {
   overflow-wrap: normal;
 }
 
+[id] {
+  scroll-margin-top: 1em;
+}
+
+h1 > a,
+h2 > a,
+h3 > a,
+h4 > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1 > a:hover,
+h2 > a:hover,
+h3 > a:hover,
+h4 > a:hover {
+  text-decoration: underline;
+}
+
+h1[id]:hover::after,
+h2[id]:hover::after,
+h3[id]:hover::after,
+h4[id]:hover::after {
+  content: "\00b6";
+  margin-left: 0.3em;
+  opacity: 0.4;
+}
+
 .text {
   color: var(--font-color);
 }
