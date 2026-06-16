@@ -151,7 +151,7 @@ from a word hence it requires a training to build a model.
 I've written a small program that does the training and encoding. This could be helpful if you prefer
 to read the source.
 
-[https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/tokenizer/main.ml](https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/tokenizer/main.ml)
+[https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/tokenizer/tokenizer.ml](https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/tokenizer/tokenizer.ml)
 
 In this blog I will explain the high-level concept of the steps.
 
