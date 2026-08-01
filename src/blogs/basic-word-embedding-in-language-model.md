@@ -1,12 +1,12 @@
 ---
 layout: 'blog.njk'
-title: Why Vector Means So Much For A Language Model (#1 Learning Word Embeddings From Scratch)
+title: How Vector Is Produced In An Embedding Model
 description: Understanding how vector plays an important role for a language model
 tags: blog
 date: 2026-07-20
 ---
 
-# Why Vector Means So Much For A Language Model: Learning Word Embeddings From Scratch
+# How Vector Is Produced In An Embedding Model
 
 My first time hearing word _'embedding'_ is when I read book about MLOps. MLOps is somewhat like DevOps but with
 additional task on partly of Machine Learning work (deploying model, setup feature pipeline, etc.). When I got into
