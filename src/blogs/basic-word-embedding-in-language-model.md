@@ -291,9 +291,9 @@ at image below.
   <figcaption>Figure 2. Sun aligns more with wave than rise.</figcaption>
 </figure>
 
-The vectors have different lengths and point in different directions. We can measure the direction of a vector from its angle, the value of θ. With all this
-information, we calculate it using a formula to determine its alignment so that the result will tell how aligned
-those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
+The vectors have different lengths and point in different directions. We can measure the direction of a vector
+from its angle, the value of θ. With all this information, we calculate it using a formula to determine its
+alignment so that the result will tell how aligned those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
 
 > a ⋅ b = ∑(ai ∗ bi)
 
@@ -333,9 +333,9 @@ vector A ⋅ vector B = 0.486477
 
 The result is larger than before. What does that mean? In the dot product, a larger result generally means
 the two vectors are pointing in a more similar direction. The result is also influenced by the lengths of
-the vectors, so both the direction and the lengths contribute to the final value. Looking back at the previous
-illustration of the vectors "Sun", "Wave", and "Rise", we can see that "Sun" forms a smaller angle with "Wave"
-than with "Rise". Since the angle is smaller, the dot product between "Sun" and "Wave" becomes larger.
+the vectors, so both the direction and the lengths contribute to the final value. Looking back at Figure 2,
+we can see that "Sun" forms a smaller angle with "Wave" than with "Rise". Since the angle is smaller,
+the dot product between "Sun" and "Wave" becomes larger.
 
 The next question is, is it right? Is word "Sun" related to "Wave"? No, based on the dataset. Yet the number
 tells vector "Sun" is more aligned with "Wave". So how can we tell the model this is wrong?
@@ -346,3 +346,16 @@ When encountering a wrong prediction, the model is not aware of right and wrong.
 to calculate how aligned vector A and vector B. Since initially we set the vector as random, the model
 prediction is only as good as the current value in embedding vector table. So we need to give the model a way
 to ask _"how wrong am I?"_ and answer it by itself.
+
+Recall the result from dot product of "Sun" and "Rise" was 0.372736 while dot product of "Sun" and "Wave" is 0.486477.
+A larger dot product indicates that the model predicts the two words more related. At first glance, we might think of
+choosing a threshold—for example, if the dot product is greater than X, we classify the pair as related;
+otherwise, we classify it as unrelated.
+
+The problem is that training does not stop after one update. As the embedding vectors continue to change over
+many epochs, the dot product can keep increasing. A score that was once 0.48 might later become 10, 20, or
+even 100. Since there is no fixed upper bound, a threshold that works early in training may no longer make
+sense later.
+
+Instead of comparing these unbounded scores directly, we first convert them into values within a fixed
+range. One way to do is using a [Sigmoid function](https://www.geeksforgeeks.org/machine-learning/derivative-of-the-sigmoid-function/).
