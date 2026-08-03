@@ -1,12 +1,12 @@
 ---
 layout: 'blog.njk'
-title: How Vectors Are Produced in an Embedding Model
-description: Understanding how vector plays an important role for a language model
+title: How Vectors Are Produced In An Embedding Model
+description: Understanding how vector is produced in an embedding model
 tags: blog
-date: 2026-07-20
+date: 2026-08-03
 ---
 
-# How Vectors Are Produced in an Embedding Model
+# How Vectors Are Produced In An Embedding Model
 
 My first time hearing word _'embedding'_ is when I read book about MLOps. MLOps is somewhat like DevOps but with
 additional task on partly of Machine Learning work (deploying model, setup feature pipeline, etc.). When I got into
@@ -113,7 +113,7 @@ a production grade embedding model. So the steps will consist of:
 2. Calculate loss
 3. Update vector
 
-### Initialize Embedding Vector Table
+### 1. Initialize Embedding Vector Table
 
 Before starting a training process, we need to prepare a dataset first by breaking down sentences into words
 then group it based on its sentence. So,
@@ -166,7 +166,8 @@ our capacity to add our answers.
 
 #### Trial 2: Count Frequency of Word Pairs in Sentence
 
-Since doing it by hand is pretty tedious, what if we just write a program to count the frequency of a pair of words appear together in a sentence?
+Since doing it by hand is pretty tedious, what if we just write a program to count the
+frequency of a pair of words appear together in a sentence?
 
 See this table as example,
 
@@ -205,7 +206,7 @@ Instead of asking, "How many times did these two words appear together?", we can
 these words in the embedding space?"
 
 We call these coordinates "**vectors**". Each dimension is simply one coordinate of the vector. Individually
-the numbers have no human meaning, but together they determine the word's position in the geometric space.
+the numbers have no meaning, but together they determine the word's position in the geometric space.
 
 Take a look at this example,
 
@@ -217,15 +218,59 @@ Take a look at this example,
 | ocean |        0.20 |        0.91 |        0.18 |
 | rock  |       -0.76 |        0.08 |        0.61 |
 
+At a glance, the number is just random and does not have any meaning. Yet later, after we learn about
+embedding training steps, we will start to see how these numbers can be used to determine similarity
+between words.
 
+#### Initialize Random Vector
 
+Before starting the training steps, each word needs to be assigned with a vector. Let's just use 3 dimensions
+just for this example. Each dimension will have a random vector, which means the model has no prior knowledge
+what these words are and the relationship. The model also doesn't see word as string but token ID from tokenizer.
+Suppose we have vocabulary from the tokenizer like this,
 
+| Token ID | Word  |
+| -------: | ----- |
+|        1 | boat  |
+|        2 | fish  |
+|        3 | glow  |
+|        4 | moon  |
+|        5 | ocean |
+|        6 | rise  |
+|        7 | rock  |
+|        8 | sky   |
+|        9 | star  |
+|       10 | sun   |
+|       11 | swim  |
+|       12 | wave  |
 
+Then our embedding vector table would look like this,
 
+| Token ID | Dimension 1 | Dimension 2 | Dimension 3 |
+| -------: | ----------: | ----------: | ----------: |
+|        1 |      -0.110 |       0.551 |      -0.253 |
+|        2 |      -0.338 |      -0.207 |       0.395 |
+|        3 |      -0.039 |       0.169 |       0.694 |
+|        4 |      -0.521 |       0.966 |      -0.556 |
+|        5 |       0.686 |      -0.655 |       0.731 |
+|        6 |       0.150 |       0.061 |      -0.905 |
+|        7 |      -0.682 |      -0.355 |      -0.572 |
+|        8 |       0.223 |       0.044 |       0.145 |
+|        9 |       0.837 |       0.918 |      -0.411 |
+|       10 |       0.563 |      -0.704 |      -0.366 |
+|       11 |      -0.761 |      -0.808 |       0.994 |
+|       12 |       0.369 |      -0.045 |      -0.675 |
 
+Now we have the embedding vector table ready. What happens here, each word has coordinate in a map, they are
+scattered everywhere or maybe close to unrelated words. That is expected since the model hasn't learned anything.
 
+### 2. Calculate Loss
 
+Now that we have our data ready for training, the next step is how the training should be
+done. Since we have converted all input into number, the training step will use a lot of number operation
+or math here.
 
+[![Snoopy smile with tears by hibikicakes1](/images/basic-word-embedding-in-language-model/snoopy.gif)](https://tenor.com/view/snoopy-gif-1199808039773969830)
 
-
-
+Before that, I'd like to reiterate this may not be the formula used in frontier model but a principle step that
+I learn from writing embedding model from scratch.
