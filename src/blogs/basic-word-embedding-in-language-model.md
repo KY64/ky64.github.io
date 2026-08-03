@@ -265,7 +265,10 @@ Then our embedding vector table would look like this,
 Now we have the embedding vector table ready. What happens here, each word has coordinate in a map, they are
 scattered everywhere or maybe close to unrelated words. That is expected since the model hasn't learned anything.
 
-![Image showing a 3D diagram where the vector scattered](/images/basic-word-embedding-in-language-model/initial-embedding-vector.png)
+<figure>
+  <img src="/images/basic-word-embedding-in-language-model/initial-embedding-vector.png" alt="3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which are scattered in different directions before training.">
+  <figcaption>Figure 1. Initial token embeddings before training.</figcaption>
+</figure>
 
 We have our data ready for training, the next step is designing how the training should be
 done. Since we have converted all input into number, the training steps will use a lot of number operation
@@ -283,10 +286,12 @@ With vector, determining its "similarity" is by finding how _aligned_ two vector
 direction. Meaning we can determine its alignment by measuring length and direction of the vector. Take a look
 at image below.
 
-![Angle of sun to wave vector is smaller than angle of sun to rise vector](/images/basic-word-embedding-in-language-model/initial-sun-vector.png)
+<figure>
+  <img src="/images/basic-word-embedding-in-language-model/initial-sun-vector.png" alt="3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is smaller than the angle between sun and rise.">
+  <figcaption>Figure 2. Sun aligns more with wave than rise.</figcaption>
+</figure>
 
-We can see the vector for "Sun" here is the shortest while vector for "Wave" and "Rise" are longer. Each vector also points
-to different direction. We can measure the direction of a vector from its angle, the value of θ. With all this
+The vectors have different lengths and point in different directions. We can measure the direction of a vector from its angle, the value of θ. With all this
 information, we calculate it using a formula to determine its alignment so that the result will tell how aligned
 those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
 
@@ -331,3 +336,13 @@ the two vectors are pointing in a more similar direction. The result is also inf
 the vectors, so both the direction and the lengths contribute to the final value. Looking back at the previous
 illustration of the vectors "Sun", "Wave", and "Rise", we can see that "Sun" forms a smaller angle with "Wave"
 than with "Rise". Since the angle is smaller, the dot product between "Sun" and "Wave" becomes larger.
+
+The next question is, is it right? Is word "Sun" related to "Wave"? No, based on the dataset. Yet the number
+tells vector "Sun" is more aligned with "Wave". So how can we tell the model this is wrong?
+
+### 3. Measure how wrong the prediction is
+
+When encountering a wrong prediction, the model is not aware of right and wrong. It's just doing math formula
+to calculate how aligned vector A and vector B. Since initially we set the vector as random, the model
+prediction is only as good as the current value in embedding vector table. So we need to give the model a way
+to ask _"how wrong am I?"_ and answer it by itself.
