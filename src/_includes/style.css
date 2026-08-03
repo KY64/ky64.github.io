@@ -22,6 +22,10 @@ html {
     --bg-color: #ffe2b7;
     --font-color: #3c3b3b;
     --link-color: #0004db;
+    --table-surface: #fff2db;
+    --table-heading: #f2c992;
+    --table-border: #a77847;
+    --table-stripe: #f8d7aa;
   }
 }
 
@@ -30,6 +34,10 @@ html {
     --bg-color: #393646;
     --font-color: #e3e3e3;
     --link-color: #75e6ff;
+    --table-surface: #302d3b;
+    --table-heading: #4e495f;
+    --table-border: #827c94;
+    --table-stripe: #403b4d;
   }
 }
 
@@ -109,6 +117,45 @@ pre {
 
 pre code {
   overflow-wrap: normal;
+}
+
+.table-scroll {
+  max-width: 100%;
+  margin: 1.25em 0;
+  overflow-x: auto;
+  border: 1px solid var(--table-border);
+  border-radius: 0.3em;
+  background: var(--table-surface);
+}
+
+.table-scroll:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 3px;
+}
+
+table {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+th,
+td {
+  padding: 0.55em 0.7em;
+  border: 1px solid var(--table-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: var(--table-heading);
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--table-stripe);
 }
 
 [id] {

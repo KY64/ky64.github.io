@@ -41,5 +41,21 @@ export default function (eleventyConfig) {
     return `</a>${defaultClose}`;
   };
 
+  // Markdown tables can be wider than the reading column (especially the
+  // embedding matrices in technical posts). Keep the document responsive by
+  // giving each table its own horizontal scroll container.
+  const defaultTableOpen = md.renderer.rules.table_open || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+  };
+  const defaultTableClose = md.renderer.rules.table_close || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+  };
+  md.renderer.rules.table_open = function(tokens, idx, options, env, self) {
+    return `<div class="table-scroll" tabindex="0" aria-label="Scrollable table">${defaultTableOpen(tokens, idx, options, env, self)}`;
+  };
+  md.renderer.rules.table_close = function(tokens, idx, options, env, self) {
+    return `${defaultTableClose(tokens, idx, options, env, self)}</div>`;
+  };
+
   eleventyConfig.setLibrary("md", md);
 }
