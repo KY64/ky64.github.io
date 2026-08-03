@@ -105,13 +105,14 @@ is produced and how it can find if the word is "similar" to others.
 
 ## Training Methods
 
-The training method that I follow is not exactly a [word2vec](https://www.geeksforgeeks.org/python/python-word-embedding-using-word2vec/) embedding
-yet focus on word-embedding. I was following AI as my tutor here and focus on the principle instead of building
-a production grade embedding model. So the steps will consist of:
+The training method that I follow is not exactly a [Word2Vec](https://www.geeksforgeeks.org/python/python-word-embedding-using-word2vec/)
+but is intentionally simplified to focus on the core principles of learning word embeddings rather than
+reproducing the original algorithm. So the steps will consist of:
 
-1. Initialize embedding vector table
-2. Calculate loss
-3. Update vector
+1. Initialize embedding vectors
+2. Predict how related two words are
+3. Measure how wrong the prediction is
+4. Update the vectors
 
 ### 1. Initialize Embedding Vector Table
 
@@ -264,13 +265,31 @@ Then our embedding vector table would look like this,
 Now we have the embedding vector table ready. What happens here, each word has coordinate in a map, they are
 scattered everywhere or maybe close to unrelated words. That is expected since the model hasn't learned anything.
 
-### 2. Calculate Loss
+![Image showing a 3D diagram where the vector scattered](/images/basic-word-embedding-in-language-model/initial-embedding-vector.png)
 
-Now that we have our data ready for training, the next step is how the training should be
-done. Since we have converted all input into number, the training step will use a lot of number operation
+We have our data ready for training, the next step is designing how the training should be
+done. Since we have converted all input into number, the training steps will use a lot of number operation
 or math here.
 
 [![Snoopy smile with tears by hibikicakes1](/images/basic-word-embedding-in-language-model/snoopy.gif)](https://tenor.com/view/snoopy-gif-1199808039773969830)
 
-Before that, I'd like to reiterate this may not be the formula used in frontier model but a principle step that
-I learn from writing embedding model from scratch.
+### 2. Predict how related two words are
+
+When training the model, the goal is to make the model be able to tell what is right and wrong by itself without
+any human intervention. We want the model to be able to guess whether a pair of word is related or not. However,
+since we have converted all input into a vector, how can the model guess if two words are related or not?
+
+With vector, determining its "similarity" is by finding how _aligned_ two vectors are. Vector has length and
+direction. Meaning we can determine its alignment by measuring length and direction of the vector. Take a look
+at image below.
+
+![Angle of sun to wave vector is smaller than angle of sun to rise vector](/images/basic-word-embedding-in-language-model/initial-sun-vector.png)
+
+We can see the "sun" vector here is the shortest while "wave" and "rise" vector are longer. Each vector also points
+to different direction. We can measure the direction of a vector from its angle, the value of θ. With all this
+information, we calculate it using a formula to determine its alignment so that the result will tell how aligned
+those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
+
+> a ⋅ b = ∑(ai ∗ bi)
+
+
