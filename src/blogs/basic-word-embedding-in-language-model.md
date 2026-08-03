@@ -285,11 +285,49 @@ at image below.
 
 ![Angle of sun to wave vector is smaller than angle of sun to rise vector](/images/basic-word-embedding-in-language-model/initial-sun-vector.png)
 
-We can see the "sun" vector here is the shortest while "wave" and "rise" vector are longer. Each vector also points
+We can see the vector for "Sun" here is the shortest while vector for "Wave" and "Rise" are longer. Each vector also points
 to different direction. We can measure the direction of a vector from its angle, the value of θ. With all this
 information, we calculate it using a formula to determine its alignment so that the result will tell how aligned
 those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
 
 > a ⋅ b = ∑(ai ∗ bi)
 
+So how do we do it? We create a pair of vector, vector A and vector B then we apply it into the formula. Remember
+that the words now represented as vector, so we pick two words from our dataset.
 
+First, we take one line from the dataset, `"sun rise glow"`. After that, from one line, we create a pair of word
+starting from `["sun"; "rise"]`. The tokenizer would turn this word into a token ID, 10 and 6 respectively, then
+we get the vector from these words.
+
+| Token ID | Dimension 1 | Dimension 2 | Dimension 3 |
+| -------- | ----------- | ----------- | ----------- |
+| 6        | 0.150       | 0.061       | -0.905      |
+| 10       | 0.563       | -0.704      | -0.366      |
+
+Then we apply into dot product formula:
+
+```
+vector A ⋅ vector B = (0.150 * 0.563) + (0.061 * -0.704) + (-0.905 * -0.366)
+vector A ⋅ vector B = 0.372736
+```
+
+Now that we have the result for dot product of "Sun" and "Rise". Let's do a little experiment, what if we
+pair "Sun" with "Wave" despite it's not in one line in the dataset. Token ID for "Wave" is 12, so:
+
+| Token ID | Dimension 1 | Dimension 2 | Dimension 3 |
+| -------- | ----------- | ----------- | ----------- |
+| 12       | 0.369       | -0.045      | -0.675      |
+| 10       | 0.563       | -0.704      | -0.366      |
+
+Then we apply into dot product formula:
+
+```
+vector A ⋅ vector B = (0.369 * 0.563) + (-0.045 * -0.704) + (-0.675 * -0.366)
+vector A ⋅ vector B = 0.486477
+```
+
+The result is larger than before. What does that mean? In the dot product, a larger result generally means
+the two vectors are pointing in a more similar direction. The result is also influenced by the lengths of
+the vectors, so both the direction and the lengths contribute to the final value. Looking back at the previous
+illustration of the vectors "Sun", "Wave", and "Rise", we can see that "Sun" forms a smaller angle with "Wave"
+than with "Rise". Since the angle is smaller, the dot product between "Sun" and "Wave" becomes larger.
