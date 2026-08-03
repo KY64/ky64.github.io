@@ -1,5 +1,5 @@
 ---
-layout: 'blog.njk'
+layout: "blog.njk"
 title: How Vectors Are Produced In An Embedding Model
 description: Understanding how vector is produced in an embedding model
 tags: blog
@@ -57,7 +57,7 @@ in the dataset—just like a teacher noticing two kids playing together every da
 to assign them desks side by side. Should they sit together on the center? right corner? left corner? It doesn't
 matter as long as they face the same direction.
 
-> __*Note:*__
+> **_Note:_**
 > _I'm not an AI researcher, scientist or an expert in this field. This blog is pure exploration and notes on
 > what is my current understanding about components of AI. Please do clarify with someone who knows better._
 
@@ -77,7 +77,7 @@ questions:
 1. How those numbers are produced?
 2. What it means to the model?
 3. If those numbers are just random, why don't we just assign a random number for each word instead of using
-an embedding model?
+   an embedding model?
 
 Thus, to answer the questions, I decided to write a minimal embedding model from scratch.
 
@@ -133,13 +133,13 @@ becomes,
 after that, we assign ID for each word and ensure we get a unique list of words eventually. So it's something
 like,
 
-- sun = 12
-- rise = 31
-- glow = 8
-- moon = 3
+- sun = 10
+- rise = 6
+- glow = 3
+- moon = 4
 
 and so on. There is no reason why that number is chosen. We can even use a tokenizer model to breakdown the
-sentence then get ID for each token. From here on, we interpret "sun = 12" as "sun has token ID 12".
+sentence then get ID for each token. From here on, we interpret "sun = 10" as "sun has token ID 10".
 
 Now we have a list of token IDs, the next question is, how can we tell the model that each token ID has
 relationship to each other? For example, how can we tell the model if a word "sun" should be
@@ -150,18 +150,18 @@ paired with "rise" or "glow"? Since in the dataset, "sun" is in one sentence wit
 
 Let's create this table as example
 
-|words|related to sun|not related to sun|
-|------|-------------|------------------|
-|rise  |1            |0                 |
-|glow  |1            |0                 |
-|rock  |0            |1                 |
-|ocean |1            |0                 |
+| words | related to sun | not related to sun |
+| ----- | -------------- | ------------------ |
+| rise  | 1              | 0                  |
+| glow  | 1              | 0                  |
+| rock  | 0              | 1                  |
+| ocean | 1              | 0                  |
 
-While this works for a handful of words, the model can simply 
-lookup which word related to other word. As the vocabulary grows, we need to define what each new word relationship with the 
-existing words in vocabulary. How many new relationship we need 
-to define? You can imagine how many columns we end up with and 
-how tedious it would be. The table never learns but depends on 
+While this works for a handful of words, the model can simply
+lookup which word related to other word. As the vocabulary grows, we need to define what each new word relationship with the
+existing words in vocabulary. How many new relationship we need
+to define? You can imagine how many columns we end up with and
+how tedious it would be. The table never learns but depends on
 our capacity to add our answers.
 
 #### Trial 2: Count Frequency of Word Pairs in Sentence
@@ -171,25 +171,25 @@ frequency of a pair of words appear together in a sentence?
 
 See this table as example,
 
-| x |sun|glow|rock|ocean|rise|
-|---|---|----|----|-----|----|
-|sun|0  |2   |0   |1    |1   |
-|glow|2 |0   |0   |1    |0   |
-|rock|0 |0   |0   |0    |0   |
-|ocean|1|1   |0   |0    |0   |
-|rise|1 |1   |0   |0    |0   |
+| x     | sun | glow | rock | ocean | rise |
+| ----- | --- | ---- | ---- | ----- | ---- |
+| sun   | 0   | 2    | 0    | 1     | 1    |
+| glow  | 2   | 0    | 0    | 1     | 0    |
+| rock  | 0   | 0    | 0    | 0     | 0    |
+| ocean | 1   | 1    | 0    | 0     | 0    |
+| rise  | 1   | 1    | 0    | 0     | 0    |
 
 Now this looks better because by knowing the frequency of a pair of word appear together indicates
 it has relationship to one and another. We can call that table **[Co-occurrence Matrix](https://www.baeldung.com/cs/co-occurrence-matrices)**.
 Let's look ahead, how many words are we going to pair with? There are [appoximately](https://www.merriam-webster.com/help/faq-how-many-english-words)
-470,000 English words. If we create the table with 470,000 words 
-then the size would be 470,000 x 470,000. That's already huge, 
-also many of the columns would have zero values since it may not 
+470,000 English words. If we create the table with 470,000 words
+then the size would be 470,000 x 470,000. That's already huge,
+also many of the columns would have zero values since it may not
 have relation to many words.
 
-There is another concern. Although the relationships are discovered automatically from the dataset, they are 
+There is another concern. Although the relationships are discovered automatically from the dataset, they are
 still limited by the patterns present in the training data. If two words never appear in similar contexts,
-the model has no evidence that they  are related. For example, if the dataset contains "sun rise" but 
+the model has no evidence that they are related. For example, if the dataset contains "sun rise" but
 never "sun shine" it won't consider word "shine" has relation to "sun".
 
 #### Spatial Coordinates
@@ -211,12 +211,12 @@ the numbers have no meaning, but together they determine the word's position in 
 Take a look at this example,
 
 | word  | dimension 1 | dimension 2 | dimension 3 |
-| ----- | ----------: | ----------: | ----------: |
-| sun   |        0.82 |        0.41 |        0.12 |
-| rise  |        0.79 |        0.44 |        0.10 |
-| glow  |        0.84 |        0.39 |        0.15 |
-| ocean |        0.20 |        0.91 |        0.18 |
-| rock  |       -0.76 |        0.08 |        0.61 |
+| ----- | ----------- | ----------- | ----------- |
+| sun   | 0.82        | 0.41        | 0.12        |
+| rise  | 0.79        | 0.44        | 0.10        |
+| glow  | 0.84        | 0.39        | 0.15        |
+| ocean | 0.20        | 0.91        | 0.18        |
+| rock  | -0.76       | 0.08        | 0.61        |
 
 At a glance, the number is just random and does not have any meaning. Yet later, after we learn about
 embedding training steps, we will start to see how these numbers can be used to determine similarity
@@ -230,36 +230,36 @@ what these words are and the relationship. The model also doesn't see word as st
 Suppose we have vocabulary from the tokenizer like this,
 
 | Token ID | Word  |
-| -------: | ----- |
-|        1 | boat  |
-|        2 | fish  |
-|        3 | glow  |
-|        4 | moon  |
-|        5 | ocean |
-|        6 | rise  |
-|        7 | rock  |
-|        8 | sky   |
-|        9 | star  |
-|       10 | sun   |
-|       11 | swim  |
-|       12 | wave  |
+| -------- | ----- |
+| 1        | boat  |
+| 2        | fish  |
+| 3        | glow  |
+| 4        | moon  |
+| 5        | ocean |
+| 6        | rise  |
+| 7        | rock  |
+| 8        | sky   |
+| 9        | star  |
+| 10       | sun   |
+| 11       | swim  |
+| 12       | wave  |
 
 Then our embedding vector table would look like this,
 
 | Token ID | Dimension 1 | Dimension 2 | Dimension 3 |
-| -------: | ----------: | ----------: | ----------: |
-|        1 |      -0.110 |       0.551 |      -0.253 |
-|        2 |      -0.338 |      -0.207 |       0.395 |
-|        3 |      -0.039 |       0.169 |       0.694 |
-|        4 |      -0.521 |       0.966 |      -0.556 |
-|        5 |       0.686 |      -0.655 |       0.731 |
-|        6 |       0.150 |       0.061 |      -0.905 |
-|        7 |      -0.682 |      -0.355 |      -0.572 |
-|        8 |       0.223 |       0.044 |       0.145 |
-|        9 |       0.837 |       0.918 |      -0.411 |
-|       10 |       0.563 |      -0.704 |      -0.366 |
-|       11 |      -0.761 |      -0.808 |       0.994 |
-|       12 |       0.369 |      -0.045 |      -0.675 |
+| -------- | ----------- | ----------- | ----------- |
+| 1        | -0.110      | 0.551       | -0.253      |
+| 2        | -0.338      | -0.207      | 0.395       |
+| 3        | -0.039      | 0.169       | 0.694       |
+| 4        | -0.521      | 0.966       | -0.556      |
+| 5        | 0.686       | -0.655      | 0.731       |
+| 6        | 0.150       | 0.061       | -0.905      |
+| 7        | -0.682      | -0.355      | -0.572      |
+| 8        | 0.223       | 0.044       | 0.145       |
+| 9        | 0.837       | 0.918       | -0.411      |
+| 10       | 0.563       | -0.704      | -0.366      |
+| 11       | -0.761      | -0.808      | 0.994       |
+| 12       | 0.369       | -0.045      | -0.675      |
 
 Now we have the embedding vector table ready. What happens here, each word has coordinate in a map, they are
 scattered everywhere or maybe close to unrelated words. That is expected since the model hasn't learned anything.
