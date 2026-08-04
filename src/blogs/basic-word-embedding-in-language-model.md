@@ -73,7 +73,7 @@ sun -> [5.625; -2.911; 0.237]
 
 I still couldn't understand what those numbers represented. I kept coming back to these questions:
 
-1. How those numbers are produced?
+1. How are those numbers produced?
 2. What do they mean to the model?
 3. If those numbers are just random, why don't we just assign a random number for each word instead of using
    an embedding model?
@@ -82,7 +82,7 @@ Thus, to answer the questions, I decided to write a minimal embedding model from
 
 ## Talking About Data
 
-What I didn't realize about embedding model was, it requires training. Just like when I wrote a tokenizer [before](../tokenizer-in-language-model),
+What I didn't realize about embedding models was, it requires training. Just like when I wrote a tokenizer [before](../tokenizer-in-language-model),
 the program needs to learn a pattern to create a model. Training requires a dataset, so we need a set of valid
 and meaningful sentences to be able to create an embedding model. During training, the model learns which words
 appear together in a sentence in the dataset. Those patterns are what we call "context". Therefore, to
@@ -168,7 +168,7 @@ depends entirely on us to specify every relationship.
 #### Trial 2: Count Frequency of Word Pairs in Sentence
 
 Since doing it by hand is pretty tedious, what if we just write a program to count the
-frequency of a pair of words appear together in a sentence?
+frequency of a pair of words appearing together in a sentence?
 
 See this table as example,
 
@@ -425,10 +425,19 @@ error = target - prediction
 - **target**, the correct value from the dataset (1.0 for related, 0.0 for unrelated)
 - **prediction**, the model's predicted value after applying the sigmoid function
 
+Once the model knows it's wrong, how does it become less wrong?
+
 ### 4. Update the vectors
 
+After the model measures how wrong its prediction after making a prediction, the model needs to know
+how to reduce the error. The only way to reduce it is by changing the prediction score to be closer
+to target.
+
+We don't need to change the target, nor the dataset, only the vectors since we calculate the prediction
+using dot product. Therefore, we will use the error to update the vectors.
+
 Recall that the dot product is influenced by both the direction and the lengths of the two vectors.
-Therefore, updating an embedding changes both of these properties. This can be done by updating vector A in
+Hence, changing a vector changes the dot product. This can be done by updating vector A in
 the direction of vector B. As a result, the direction of vector A gradually becomes more aligned with vector B,
 while its length may also change during training.
 
@@ -464,26 +473,25 @@ Well, that's an improvement. Previously we got 0.592111 and now we get 0.672041.
 more confidence in its prediction. What about the wrong pair of "Sun" and "Wave" ? We follow the same steps but
 the only different is we set the target to 0.0 because we want the similarity to be as low as possible.
 
-#### Subtle Improvement
+#### Preventing Large Updates
 
-There is one subtle improvement we can do, notice that an error gives the model how wrong its prediction was.
-During training, the model predicts one pair at a time then updating a pair of vector at a time. Which means,
-if we have 8 lines of text in dataset, it will start sequentially from first line. The word "Sun" in the dataset
-is placed on the same line with words "Rise", "Glow", and "Ocean". We have the following in the dataset:
+Now the model knows how to reduce the error, yet there is one other problem we still need to fix.
+Every prediction is immediately followed by an update to a vector during training. If we have eight lines
+of text in the dataset, training starts from the first line and updates the vectors sequentially.
+The word "Sun" in the dataset is placed on the same line with words "Rise", "Glow", and "Ocean".
+We have the following in the dataset:
 
 - Line 1, "sun rise glow"
 - Line 7, "sun glow ocean"
 
-On Figure 1, we can see "Sun" and "Ocean" are facing different direction, when two vectors point to a different direction
-then the error will be large, when the error is large, the model will update the vector aggressively to make
-vector of "Sun" as close as possible to vector of "Ocean". In other words, when "Sun" is already more aligned with
-"Rise", it will instead move in direction of "Ocean" while at the same time being less aligned with "Rise" vector.
+After updating "Sun" to become more aligned with "Rise", the next training pair may update it again to
+become more aligned with "Glow", then with "Ocean". Each update helps the current pair but can partially
+undo a previous one.
 
-This will cause a problem because eventually the model either takes more time to train or it never learns because
-every update changes the vector by a large amount, the vector can easily move past the direction we want. On the next
-training step, it may move too far again in another direction. Instead of making small adjustments, the vector keeps
-making large jumps. So how do we prevent this? We basically tells the model to reduce the update by smaller amount.
-How? By adding another small number in the formula we use to update the vector. This number is called [Learning Rate](https://medium.com/thedeephub/learning-rate-and-its-strategies-in-neural-network-training-270a91ea0e5c).
+This will cause a problem on the next training step, it may move the vector too far again to another
+direction. Instead of making small adjustments, the vector keeps making large jumps. So how do we prevent
+this? We simply tell the model to make a smaller update. How? By adding another small
+number in the formula we use to update the vector. This number is called [Learning Rate](https://medium.com/thedeephub/learning-rate-and-its-strategies-in-neural-network-training-270a91ea0e5c).
 
 While there are many techniques to specify learning rate, we focus on main purpose here: **to make each update
 smaller so the vector changes more carefully during training.** Hence, the formula is:
@@ -497,8 +505,8 @@ I used 0.1 as a start and then adjust the epochs to get a better result of the t
 
 ## Training Results
 
-After many epochs, the vector pairs slowly aligned to points to the same direction and the model prediction gets
-better to determine relationship between words correctly based on the dataset. This is how embedding vectors
+After many epochs, related word vectors gradually become more aligned, allowing the model to predict
+relationships between words more accurately based on the training dataset. This is how embedding vectors
 for "Sun", "Rise", and "Wave" look like now after training:
 
 <figure>
@@ -507,8 +515,9 @@ for "Sun", "Rise", and "Wave" look like now after training:
 </figure>
 
 When comparing with Figure 2, we notice that "Sun" is now more aligned with "Rise" than with "Wave". This shows
-the model is able to predict the words relationship better. After training, the whole embedding vector will look
-like this,
+the model is able to predict the relationships between words better. Figure 3 only shows one example
+involving "Sun". If we look at all of the word vectors after training, we can see the same pattern across
+the entire vocabulary in the following figure.
 
 <figure>
   <img src="/images/basic-word-embedding-in-language-model/trained-embedding-vector.png" alt="3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which has more aligned directions after training.">
@@ -516,20 +525,26 @@ like this,
 </figure>
 
 Notice that "Sun", "Rise", and "Glow" now point in similar directions. "Ocean" also points in a roughly similar
-direction, although not as closely aligned as "Rise" or "Glow". This makes sense because the word "Ocean" appears
-with "Sun" in one sentence, but it also appears with "Fish", "Swim", "Wave", and "Boat". During training, the embedding
-is influenced by all of these relationships rather than just one word pair. So how does the model able to
-determine the vectors similarity?
+direction, although not as closely aligned. This is expected because the word "Ocean" appears
+with "Sun" in one sentence, but it also appears with words such as "Fish", "Swim", "Wave", and "Boat".
+The final position of each vector reflects all of the relationships the model learned during training,
+not just a single word pair.
+
+Now the vectors are no longer mysterious. They start as random numbers, and repeated prediction, error measurement,
+and small corrections gradually organize them into meaningful positions.
+
+Since the vectors have meaningful positions, how does the model measure the similarity between two vectors?
 
 ## Calculating Similarity
 
-During training, updating one vector by adding a portion of another changes both its direction and its length.
+During training, we used the dot product to predict how related two words were. After each prediction,
+we updated one vector by adding a portion of another, which changed both its direction and its length.
 The goal, however, is to make **vectors of related words** point in similar directions. The change in vector
 length is simply a side effect of the update process. As shown in Figure 4, the vectors do not necessarily have
 the same length, yet they point in similar directions.
 
-Can we compare only the direction of two vectors? Yes. This is where we use a formula called
-[Cosine Similarity](https://www.geeksforgeeks.org/dbms/cosine-similarity/),
+Can we compare only the direction of two vectors? Yes. Instead of comparing both length and direction,
+we use a formula called [Cosine Similarity](https://www.geeksforgeeks.org/dbms/cosine-similarity/),
 which measures how closely two vectors point in the same direction while ignoring their lengths.
 
 Cosine similarity ranges from -1.0 to 1.0. A value close to 1.0 means two vectors point in nearly
@@ -556,37 +571,37 @@ and **"Boat"**. These additional relationships pull its vector toward a differen
 with **"Sun"** than **"Glow"** or **"Rise"**.
 
 Finally, **"Fish"** and **"Swim"** receive negative similarity scores because their vectors point in almost the
-opposite direction from **"Sun"**. Even though they are related to **"Ocean"**, they do not share the same context
-as **"Sun"**, so the model learns to place them in a different region of the embedding space.
+opposite direction from **"Sun"**. Even though they are related to **"Ocean"**, they do not appear in similar
+contexts as "Sun", so the model places them in a different region of the embedding space.
 
 ## Final Answers
 
-So that's how vectors are produced in embedding model and using it to determine its similarity. Let's revisit
-our initial questions:
+We've now seen how embedding vectors are created and how the model uses them to measure similarity.
+Let's revisit the questions we started with.
 
-1. How those numbers are produced?
+1. How are those numbers produced?
 
-> When the model gets an input of a word. It will convert it into a token ID then search the embedding vector for that token.
-> The number is a vector and initially it was just random number, then during training the number is updated so it points
-> to similar direction.
+> They are not assigned manually. Each word starts with a random vector. During training, the model
+> repeatedly predicts relationships between words, measures its error, and updates the vectors.
+> After many iterations, the vectors gradually move into positions that reflect the relationships learned
+> from the training data.
 
 2. What do they mean to the model?
 
-> The model doesn't know word as human did. Hence it doesn't read like human but treat it as a vector. At a glance,
-> the number seems random, but if we apply a mathematical formula like Cosine similarity, the model is able to
-> predict what other vectors are pointing to similar direction like the input vector. The model then predict that is
-> the related words.
+> The model does not understand words the way humans do. Instead, it represents each word as a vector.
+> Individually, the numbers are meaningless. Together, however, they determine a word's
+> position in the embedding space. The model compares these positions mathematically to estimate how
+> closely different words are related.
 
 3. If those numbers are just random, why don't we just assign a random number for each word instead of using
    an embedding model?
 
-> At a glance, the number seems random, but it is actually a representation of what the model has learned.
-> If we apply a mathematical formula like Cosine similarity, the model is
-> able to predict what other vectors are pointing to similar direction like the input vector. The model then predict
-> that is the related words.
+> Random vectors contain no useful information. Training gradually adjusts them so that words appearing in
+> similar contexts move closer together. The final vectors therefore represent patterns the model learned
+> from the dataset rather than arbitrary numbers.
 
 I have written the simple POC program [here](https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/embedding).
-This learning takes time, I just finished this despite Claude Opus 5 already released. I haven't touched the
-transformer yet to understand when the model stops paying attention, and also how tool calling works. This may
-give me a broad perspective how a vector plays a big role in a language model. Let's keep learning the principle
-first!
+Understanding these ideas takes time. By the time I finished writing this article, newer models had already
+been released. I haven't touched the transformer yet to understand when the model stops paying attention,
+and also how tool calling works. I hope this also gives a broader perspective on how vectors play such an
+important role in language models. Let's keep learning the principles first!
