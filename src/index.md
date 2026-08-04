@@ -6,7 +6,7 @@ description: Thoughts, learning processes and experiences of one software engine
 
 ## Projects
 
-These are the least that I could share publicly:
+A few public projects and tools:
 
 - **[Scribe & Saga: Text RPG UI](https://ky64.codeberg.page/local-text-rpg-ui/)**: Messy project to create a simple interface to generate RPG story from LLM. Inspired by [Perchance AI RPG](https://perchance.org/ai-rpg) but aims to support local model, and does the heavy lifting of context management locally.
 - **[Di Surabaya](https://di-surabaya.com/)**: Surabaya town guide for personal usage. It's built to save a lot of clicking, typing, 
@@ -14,7 +14,10 @@ These are the least that I could share publicly:
 - **[PIC (PNG Image Combinator)](https://ky64.codeberg.page/pic/)**: Combining multiple PNG images into a single image. Inspired by
   [HashLips](https://github.com/HashLips/hashlips_art_engine), this tool is a rewrite and trimmed down version to reduce memory usage
   when generating more than hundred of images.
-- **[Python Trace ID Logger](https://github.com/KY64/correlation-logger)**: Python logging with trace ID support
+- **[Agent Skills](https://codeberg.org/ky64/agent-skills)**: Reusable AI-agent workflows for engineering, code review, planning, testing, and security research. I use them to make agent behaviour
+more consistent and to help me implement and test software.
+- **[Agent Prompts](https://codeberg.org/ky64/agent-prompts)**: Versioned prompt experiments for teaching, editing, critical inquiry, and thinking support. Each prompt is refined for a specific
+kind of collaboration rather than treated as a one-off instruction.
 
 ## Contact Info
 
