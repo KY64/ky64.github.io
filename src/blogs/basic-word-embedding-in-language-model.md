@@ -581,22 +581,22 @@ contexts as "Sun", so the model places them in a different region of the embeddi
 We've now seen how embedding vectors are created and how the model uses them to measure similarity.
 Let's revisit the questions we started with.
 
-1. How are those numbers produced?
+1. **How are those numbers produced?**
 
 > They are not assigned manually. Each word starts with a random vector. During training, the model
 > repeatedly predicts relationships between words, measures its error, and updates the vectors.
 > After many iterations, the vectors gradually move into positions that reflect the relationships learned
 > from the training data.
 
-2. What do they mean to the model?
+2. **What do they mean to the model?**
 
 > The model does not understand words the way humans do. Instead, it represents each word as a vector.
 > Individually, the numbers are meaningless. Together, however, they determine a word's
 > position in the embedding space. The model compares these positions mathematically to estimate how
 > closely different words are related.
 
-3. If those numbers are just random, why don't we just assign a random number for each word instead of using
-   an embedding model?
+3. **If those numbers are just random, why don't we just assign a random number for each word instead of using
+   an embedding model?**
 
 > Random vectors contain no useful information. Training gradually adjusts them so that words appearing in
 > similar contexts move closer together. The final vectors therefore represent patterns the model learned
