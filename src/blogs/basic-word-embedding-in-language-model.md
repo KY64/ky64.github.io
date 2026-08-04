@@ -295,9 +295,8 @@ When training the model, the goal is to make the model be able to tell what is r
 any human intervention. We want the model to be able to guess whether a pair of word is related or not. However,
 since we have converted all input into a vector, how can the model guess if two words are related or not?
 
-With vector, determining its "similarity" is by finding how _aligned_ two vectors are. Vector has length and
-direction. Meaning we can determine its alignment by measuring length and direction of the vector. Take a look
-at image below.
+With vector, determining its "similarity" is by finding how _aligned_ two vectors are. The alignment can be
+measured through length and direction of the vector. Take a look at image below.
 
 <figure>
   <img src="/images/basic-word-embedding-in-language-model/initial-sun-vector.png" alt="3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is smaller than the angle between sun and rise.">
@@ -305,15 +304,20 @@ at image below.
 </figure>
 
 The vectors have different lengths and point in different directions. We can measure the direction of a vector
-from its angle, the value of θ. With all this information, we calculate it using a formula to determine its
-alignment so that the result will tell how aligned those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
+from its angle, the value of θ. So how do we tell if two vectors are aligned or not? We need to measure its
+alignment and produce a number that the model uses to make its prediction.
+The vector alignment can be calculated using a formula called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
 
 > a ⋅ b = ∑(a<sub>i</sub> x b<sub>i</sub>)
 
 So how do we do it? We create a pair of vector, vector A and vector B then we apply it into the formula. Remember
 that the words now represented as vector, so we pick two words from our dataset.
 
-First, we take one line from the dataset, `"sun rise glow"`. After that, from one line, we create a pair of word
+For every pair of words in the dataset, the model calculates a dot product to produce its current prediction
+of how related the pair is. The result is the current model prediction on how related these two words are. It
+reflects _the model's current belief_, not _what_ the training data says is correct.
+
+Let's try one example, we take one line from the dataset, `"sun rise glow"`. After that, from one line, we create a pair of word
 starting from `["sun"; "rise"]`. The tokenizer would turn this word into a token ID, 10 and 6 respectively, then
 we get the vector from these words.
 
@@ -330,7 +334,7 @@ vector A(Rise) ⋅ vector B(Sun) = 0.372736
 ```
 
 Now that we have the result for dot product of "Sun" and "Rise". Let's do a little experiment, what if we
-pair "Sun" with "Wave" despite it's not in one line in the dataset. Token ID for "Wave" is 12, so:
+pair "Sun" with "Wave" despite it's not in the same line in the dataset. Token ID for "Wave" is 12, so:
 
 | Token ID | Dimension 1 | Dimension 2 | Dimension 3 |
 | -------- | ----------- | ----------- | ----------- |
@@ -360,15 +364,25 @@ to calculate how aligned vector A and vector B. Since initially we set the vecto
 prediction is only as good as the current value in embedding vector table. So we need to give the model a way
 to ask _"how wrong am I?"_ and answer it by itself.
 
-Recall the result from dot product of "Sun" and "Rise" was 0.372736 while dot product of "Sun" and "Wave" is 0.486477.
-A larger dot product indicates that the model predicts the two words more related. At first glance, we might think of
-choosing a threshold—for example, if the dot product is greater than X, we classify the pair as related;
-otherwise, we classify it as unrelated.
+The simplest way is to compare the model's prediction with the correct answer from the dataset.
+
+#### Calculate Error
+
+How can the model measure how wrong its prediction? We need two things:
+
+- What the model predicts,
+- What the dataset says is correct.
+
+The model already has a prediction from the dot product. However, there is one problem. Recall the result
+from dot product of "Sun" and "Rise" was 0.372736 while dot product of "Sun" and "Wave"
+is 0.486477. A larger dot product indicates that the model predicts the two words more related. At first glance,
+we might think we can directly interpret the dot product. For example, we might decide that values greater
+than X mean the pair is related, while smaller values mean it is unrelated.
 
 The problem is that training does not stop after one update. As the embedding vectors continue to change over
 many epochs, the dot product can keep increasing. A score that was once 0.48 might later become 10, 20, or
-even 100. Since there is no fixed upper bound, a threshold that works early in training may no longer make
-sense later.
+even 100. Since there is no fixed upper bound, a value of X that seems reasonable early in training may no
+longer make sense later.
 
 Instead of comparing these unbounded scores directly, we first convert them into values within a fixed
 range. One way to do is using a [Sigmoid function](https://www.geeksforgeeks.org/machine-learning/derivative-of-the-sigmoid-function/).
@@ -380,9 +394,9 @@ where `e` is approximately 2.718
 #### Convert Prediction Value
 
 To put it simply, Sigmoid function will convert the dot product result into a value between 0.0 to 1.0. This
-helps us clearly see the boundary and we can determine threshold. In this case, a value close to 1.0 means
-the model predicts the pair is similar, 0.5 means the model is uncertain, and a value close to 0.0 means
-the pair is unrelated.
+converts the dot product into a value that is much easier to interpret and compare with the correct
+target from the dataset. In this case, a value close to 1.0 means the model predicts the pair is
+similar, 0.5 means the model is uncertain, and a value close to 0.0 means the pair is unrelated.
 
 Let's apply Sigmoid function to dot product of "Sun" and "Rise",
 
@@ -398,25 +412,18 @@ then apply Sigmoid function to dot product of "Sun" and "Wave",
 σ(x) = 0.619264
 ```
 
-Now that we have a clear result, let's call that number "prediction". We know that the number would be no more than 1.0 and no less than 0.0, the model
-can safely assumes whether its prediction right or wrong.
+Now that we have converted the dot product into a value between 0.0 and 1.0, we will use that value
+as the model's prediction. We can compare it directly with the target from the dataset.
 
-#### Calculate Error
-
-Since we know that close to 1.0 means similar, while close to 0.0 means unrelated, how can the model measure how wrong
-its prediction? We just use a simple formula:
+Now we can use a simple formula to measure how wrong the model prediction is:
 
 ```
 error = target - prediction
 ```
 
 - **error**, how wrong the model prediction is
-- **target**, if the pair should be similar then 1.0, otherwise 0.0
-- **prediction**, how confident the model predict the similarity of the pair, or we can say _confidence score_
-
-Suppose the model predicts a pair of "Sun" and "Rise" is similar with confidence score 0.592111, while the
-target is 1.0, then the error here is 0.407889. So how can we use this error to update the vector to be more
-aligned?
+- **target**, the correct value from the dataset (1.0 for related, 0.0 for unrelated)
+- **prediction**, the model's predicted value after applying the sigmoid function
 
 ### 4. Update the vectors
 
@@ -561,7 +568,7 @@ our initial questions:
 
 > When the model gets an input of a word. It will convert it into a token ID then search the embedding vector for that token.
 > The number is a vector and initially it was just random number, then during training the number is updated so it points
-> to similar direction. 
+> to similar direction.
 
 2. What do they mean to the model?
 
@@ -578,7 +585,7 @@ our initial questions:
 > able to predict what other vectors are pointing to similar direction like the input vector. The model then predict
 > that is the related words.
 
-I have written the simple POC program [here](https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/embedding). 
+I have written the simple POC program [here](https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/embedding).
 This learning takes time, I just finished this despite Claude Opus 5 already released. I haven't touched the
 transformer yet to understand when the model stops paying attention, and also how tool calling works. This may
 give me a broad perspective how a vector plays a big role in a language model. Let's keep learning the principle
