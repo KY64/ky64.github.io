@@ -3,7 +3,7 @@ layout: "blog.njk"
 title: How Vectors Are Produced In An Embedding Model
 description: Understanding how vector is produced in an embedding model
 tags: blog
-date: 2026-08-03
+date: 2026-08-05
 ---
 
 # How Vectors Are Produced In An Embedding Model
