@@ -295,7 +295,7 @@ The vectors have different lengths and point in different directions. We can mea
 from its angle, the value of θ. With all this information, we calculate it using a formula to determine its
 alignment so that the result will tell how aligned those vectors are. This formula is called [dot product](https://www.geeksforgeeks.org/maths/dot-product/):
 
-> a ⋅ b = ∑(ai ∗ bi)
+> a ⋅ b = ∑(a<sub>i</sub> x b<sub>i</sub>)
 
 So how do we do it? We create a pair of vector, vector A and vector B then we apply it into the formula. Remember
 that the words now represented as vector, so we pick two words from our dataset.
@@ -312,8 +312,8 @@ we get the vector from these words.
 Then we apply into dot product formula:
 
 ```
-vector A ⋅ vector B = (0.150 * 0.563) + (0.061 * -0.704) + (-0.905 * -0.366)
-vector A ⋅ vector B = 0.372736
+vector A(Rise) ⋅ vector B(Sun) = (0.150 * 0.563) + (0.061 * -0.704) + (-0.905 * -0.366)
+vector A(Rise) ⋅ vector B(Sun) = 0.372736
 ```
 
 Now that we have the result for dot product of "Sun" and "Rise". Let's do a little experiment, what if we
@@ -327,8 +327,8 @@ pair "Sun" with "Wave" despite it's not in one line in the dataset. Token ID for
 Then we apply into dot product formula:
 
 ```
-vector A ⋅ vector B = (0.369 * 0.563) + (-0.045 * -0.704) + (-0.675 * -0.366)
-vector A ⋅ vector B = 0.486477
+vector A(Wave) ⋅ vector B(Sun) = (0.369 * 0.563) + (-0.045 * -0.704) + (-0.675 * -0.366)
+vector A(Wave) ⋅ vector B(Sun) = 0.486477
 ```
 
 The result is larger than before. What does that mean? In the dot product, a larger result generally means
@@ -359,3 +359,111 @@ sense later.
 
 Instead of comparing these unbounded scores directly, we first convert them into values within a fixed
 range. One way to do is using a [Sigmoid function](https://www.geeksforgeeks.org/machine-learning/derivative-of-the-sigmoid-function/).
+
+σ(x) = 1 / (1 + e<sup>−x</sup>)
+
+where `e` is approximately 2.718
+
+#### Convert Prediction Value
+
+To put it simply, Sigmoid function will convert the dot product result into a value between 0.0 to 1.0. This
+helps us clearly see the boundary and we can determine threshold. In this case, a value close to 1.0 means
+the model predicts the pair is similar, 0.5 means the model is uncertain, and a value close to 0.0 means
+the pair is unrelated.
+
+Let's apply Sigmoid function to dot product of "Sun" and "Rise",
+
+```
+σ(x) = 1 / (1 + 2.718<sup>−0.372736</sup>)
+σ(x) = 0.592111
+```
+
+then apply Sigmoid function to dot product of "Sun" and "Wave",
+
+```
+σ(x) = 1 / (1 + 2.718<sup>−0.486477</sup>)
+σ(x) = 0.619264
+```
+
+Now that we have a clear result, let's call that number "prediction". We know that the number would be no more than 1.0 and no less than 0.0, the model
+can safely assumes whether its prediction right or wrong.
+
+#### Calculate Error
+
+Since we know that close to 1.0 means similar, while close to 0.0 means unrelated, how can the model measure how wrong
+its prediction? We just use a simple formula:
+
+```
+error = target - prediction
+```
+
+- **error**, how wrong the model prediction is
+- **target**, if the pair should be similar then 1.0, otherwise 0.0
+- **prediction**, how confident the model predict the similarity of the pair, or we can say _confidence score_
+
+Suppose the model predicts a pair of "Sun" and "Rise" is similar with confidence score 0.592111, while the
+target is 1.0, then the error here is 0.407889. So how can we use this error to update the vector to be more
+aligned?
+
+### 4. Update the vectors
+
+Recall that the dot product is influenced by both the direction and the lengths of the two vectors.
+Therefore, updating an embedding changes both of these properties. This can be done by updating vector A in
+the direction of vector B. As a result, the direction of vector A gradually becomes more aligned with vector B,
+while its length may also change during training.
+
+We can update the vector using the following formula:
+
+```
+Vector A(i) = Vector A(i) + error × Vector B(i)
+```
+
+This formula can be read as: "Take Vector A and add a portion of Vector B." The error determines how much of
+Vector B is added. If the error is positive, Vector A is updated toward the direction of Vector B. If the
+error is negative, it is updated in the opposite direction, making the vectors less aligned. As the vectors
+become more aligned, their dot product increases.
+
+Let's try updating the pair of "Sun" and "Rise" here,
+
+| Dimension | Vector A (Sun) | Error    | Vector B (Rise) | New Vector A |
+| --------- | -------------- | -------- | --------------- | ------------ |
+| 1         | 0.563          | 0.407889 | 0.150           | 0.624183     |
+| 2         | -0.704         | 0.407889 | 0.061           | -0.679119    |
+| 3         | -0.366         | 0.407889 | -0.905          | -0.73514     |
+
+Once we updated vector A, let's use the new Vector A to calculate using dot product to see if there is any
+improvement
+
+```
+Vector A(Sun) ⋅ Vector B(Raise) = (0.624183 * 0.150) + (-0.679119 * 0.061) + (-0.73514 * -0.905)
+Vector A(Sun) ⋅ Vector B(Raise) = 0.717503
+Sigmoid(0.717503) = 0.672041
+```
+
+Well, that's an improvement. Previously we got 0.592111 and now we get 0.672041. This shows the model gain
+more confident on its prediction. What about the wrong pair of "Sun" and "Wave" ? We follow the same steps but
+the only different is we set the target to 0.0 because we want the similarity to be as low as possible.
+
+#### Subtle Improvement
+
+There is one subtle improvement we can do, notice that an error gives the model how wrong its prediction was.
+During training, the model predicts one pair at a time then updating a pair of vector at a time. Which means,
+if we have 8 lines of text in dataset, it will start sequentially from first line. The word "Sun" in the dataset
+is placed on the same line with words "Rise", "Glow", and "Ocean". We have the following in the dataset:
+
+- Line 1, "sun rise glow"
+- Line 7, "sun glow ocean"
+
+On Figure 1, we can see "Sun" and "Ocean" are facing different direction, when two vectors point to a different direction
+then the error will be large, when the error is large, the model will update the vector agressively to make
+vector of "Sun" as close as possible to vector of "Ocean". In other words, when "Sun" is already more aligned with
+"Rise", it will instead move in direction of "Ocean" while at the same time being less aligned with "Rise" vector.
+
+This will cause a problem because eventually the model either takes more time to train or it never learns because
+every update changes the vector by a large amount, the vector can easily move past the direction we want. On the next
+training step, it may move too far again in another direction. Instead of making small adjustments, the vector keeps
+making large jumps. So how do we prevent this? We basically tells the model to reduce the update by smaller amount.
+How? By adding another small number in the formula we use to update the vector. This number is called [Learning Rate](https://medium.com/thedeephub/learning-rate-and-its-strategies-in-neural-network-training-270a91ea0e5c).
+
+While there are many techniques to specify learning rate, we focus on main purpose here: **to make each update
+smaller so the vector changes more carefully during training.**
