@@ -8,11 +8,11 @@ date: 2026-08-03
 
 # How Vectors Are Produced In An Embedding Model
 
-My first time hearing word _'embedding'_ is when I read book about MLOps. MLOps is somewhat like DevOps but with
-additional task on partly of Machine Learning work (deploying model, setup feature pipeline, etc.). When I got into
-"Feature Pipeline" chapter it started to discuss about RAG (Retrieval Augmented Generation) which involved using
-Embedding model. It gave some introduction about what embedding is and why it matters, it was helpful.
-However, when I saw a demo of using embedding model, I got confused instead. Take this example,
+My first time hearing word _'embedding'_ was when I read a book about MLOps. MLOps is somewhat like DevOps but with
+additional tasks on Machine Learning workflows (deploying model, setting up feature pipeline, etc.). When I got into
+the "Feature Pipeline", it introduced RAG (Retrieval Augmented Generation) which relies on an
+embedding model. The book explained what an embedding is and why it matters, which was helpful.
+However, when I saw a live demo of an embedding model in action, I got confused instead. Take this example,
 
 ```
 sun -> [5.625; -2.911; 0.237]
@@ -20,18 +20,20 @@ sun -> [5.625; -2.911; 0.237]
 
 _"How come that is the result? What just happened? What those numbers represent?"_
 
-Seeing the number just magically appear got me thinking what exactly was happening.
-Does it have meaning or is it random? If it is random then how that helped the model or
-even know that is not random?
+Seeing those numbers magically appear got me wondering what exactly was happening under the hood.
+Do these numbers have meaning or are they random? If they are random then how do they help the model, and how
+does the model know they aren't random?
 
-To find out about this, I spent time to learn how embedding works
+To find out, I spent time to learn how embedding works from the ground up.
 
 ## Summary
 
-The embedding I learned here is word-level embedding, not a sentence. It is not yet cover how transformer
-works. Just discovering how the numbers are produced.
+The embedding I explore here is a word-level embedding, not a sentence-level embedding. It does not cover
+how transformers work. Instead, it uses a simplified training process to demonstrate how initially random
+vectors can be updated to encode useful relationships. The process does not reproduce any production-grade
+embedding model.
 
-The number that becomes an output of embedding model is called _[Vector](https://www.britannica.com/science/vector-physics)_.
+The number output by an embedding model is called _[Vector](https://www.britannica.com/science/vector-physics)_.
 An embedding vector is simply a set of spatial coordinates that places a concept inside a multi-dimensional
 room. Imagine setting up a kindergarten classroom. You have a list of kids along with their profiles—their
 personalities, interests, and past drama. To keep the room peaceful, you place kids who get along close
@@ -61,7 +63,7 @@ matter as long as they face the same direction.
 > _I'm not an AI researcher, scientist or an expert in this field. This blog is pure exploration and notes on
 > what is my current understanding about components of AI. Please do clarify with someone who knows better._
 
-## I Know That's The Result But I Don't Understand
+## Breaking Down the Magic Numbers
 
 Recall the earlier example,
 
@@ -69,13 +71,10 @@ Recall the earlier example,
 sun -> [5.625; -2.911; 0.237]
 ```
 
-I wonder how those numbers are related to a word "sun", is it a unicode? ID for each character? I can't
-figure. I know that it has something to do with [helping](https://huggingface.co/blog/getting-started-with-embeddings)
-a language model to find reference as an answer or ranking similarity, yet my mind keep stuck on wondering these
-questions:
+I still couldn't understand what those numbers represented. I kept coming back to these questions:
 
 1. How those numbers are produced?
-2. What it means to the model?
+2. What do they mean to the model?
 3. If those numbers are just random, why don't we just assign a random number for each word instead of using
    an embedding model?
 
@@ -83,11 +82,11 @@ Thus, to answer the questions, I decided to write a minimal embedding model from
 
 ## Talking About Data
 
-What I didn't realise about embedding model was, it requires training. Just like when I wrote a tokenizer [before](../tokenizer-in-language-model),
+What I didn't realize about embedding model was, it requires training. Just like when I wrote a tokenizer [before](../tokenizer-in-language-model),
 the program needs to learn a pattern to create a model. Training requires a dataset, so we need a set of valid
-and meaningful sentences to be able to create an embedding model. During training, this dataset will be used
-to create a "semantic relationship" between words or so called "context". Therefore, to build a proof of concept
-I use the following minimal dataset:
+and meaningful sentences to be able to create an embedding model. During training, the model learns which words
+appear together in a sentence in the dataset. Those patterns are what we call "context". Therefore, to
+build a proof of concept I use the following minimal dataset:
 
 ```
 sun rise glow
@@ -105,9 +104,11 @@ is produced and how it can find if the word is "similar" to others.
 
 ## Training Methods
 
-The training method that I follow is not exactly a [Word2Vec](https://www.geeksforgeeks.org/python/python-word-embedding-using-word2vec/)
-but is intentionally simplified to focus on the core principles of learning word embeddings rather than
-reproducing the original algorithm. So the steps will consist of:
+To understand how embedding vectors are learned, we'll build a minimal training algorithm that demonstrates
+the core learning principle. It is much simpler than [Word2Vec](https://www.geeksforgeeks.org/python/python-word-embedding-using-word2vec/),
+and is not intended to reproduce production embedding models. Instead, it preserves the core idea: vectors
+begin as random values and gradually become meaningful through repeated prediction and correction. So the
+steps will consist of:
 
 1. Initialize embedding vectors
 2. Predict how related two words are
@@ -145,7 +146,7 @@ sentence then get ID for each token. From here on, we interpret "sun = 10" as "s
 Now we have a list of token IDs, the next question is, how can we tell the model that each token ID has
 relationship to each other? For example, how can we tell the model if a word "sun" should be
 paired with "rise" or "glow"? Since in the dataset, "sun" is in one sentence with words "rise", "glow", and
-"ocean". The simple approach is we need to add another "identifier".
+"ocean". We need some way to represent which words are related.
 
 #### Trial 1: Binary Relationship Table
 
@@ -159,11 +160,10 @@ Let's create this table as example
 | ocean | 1              | 0                  |
 
 While this works for a handful of words, the model can simply
-lookup which word related to other word. As the vocabulary grows, we need to define what each new word relationship with the
-existing words in vocabulary. How many new relationship we need
-to define? You can imagine how many columns we end up with and
-how tedious it would be. The table never learns but depends on
-our capacity to add our answers.
+lookup which word related to other word. As the vocabulary grows, we need to
+define the relationship between each new word and every existing word.
+You can imagine how many relationships we would need to define manually. The table
+depends entirely on us to specify every relationship.
 
 #### Trial 2: Count Frequency of Word Pairs in Sentence
 
@@ -182,29 +182,41 @@ See this table as example,
 
 Now this looks better because by knowing the frequency of a pair of word appear together indicates
 it has relationship to one and another. We can call that table **[Co-occurrence Matrix](https://www.baeldung.com/cs/co-occurrence-matrices)**.
-Let's look ahead, how many words are we going to pair with? There are [appoximately](https://www.merriam-webster.com/help/faq-how-many-english-words)
+Let's look ahead, how many words are we going to pair with? There are [approximately](https://www.merriam-webster.com/help/faq-how-many-english-words)
 470,000 English words. If we create the table with 470,000 words
 then the size would be 470,000 x 470,000. That's already huge,
 also many of the columns would have zero values since it may not
 have relation to many words.
 
-There is another concern. Although the relationships are discovered automatically from the dataset, they are
-still limited by the patterns present in the training data. If two words never appear in similar contexts,
-the model has no evidence that they are related. For example, if the dataset contains "sun rise" but
-never "sun shine" it won't consider word "shine" has relation to "sun".
+There is another limitation. A co-occurrence matrix can only record relationships that it directly observes.
+Even if two words appear in similar contexts, it does not record a direct relationship unless they actually
+occur together. For example:
+
+```
+sun rise
+sun glow
+
+moon rise
+moon glow
+```
+
+From the example above, "sun" and "moon" never appear together, so a co-occurrence matrix records no direct
+relationship between them. However, both words appear with "rise" and "glow", suggesting they are used in
+similar contexts. A co-occurrence matrix has no way to represent this indirect relationship.
+
+Instead of storing every observed relationship explicitly, what if we could encode each word's relationship
+patterns using only a few numbers?
 
 #### Spatial Coordinates
 
-The co-occurrence matrix stores every relationship explicitly. Instead of keeping such a large table,
-what if we could summarize each word using only a few numbers while still preserving the important relationships?
-
-One way to do this is to treat those numbers as coordinates in a geometric space.
+If words with similar relationship patterns are placed near one another, we no longer need to store every
+relationship explicitly. We only need to know _where_ each word is located.
 
 Imagine every word as a point on a map. During training, words that frequently appear in similar contexts
 gradually move into similar regions of the space, while unrelated words tend to occupy different regions.
 
-Instead of asking, "How many times did these two words appear together?", we can simply ask, "How similar are
-these words in the embedding space?"
+Once each word has a position in that space, we no longer need to look up how many times
+two words appeared together. Instead, we can compare their positions to estimate how similar they are.
 
 We call these coordinates "**vectors**". Each dimension is simply one coordinate of the vector. Individually
 the numbers have no meaning, but together they determine the word's position in the geometric space.
@@ -219,16 +231,18 @@ Take a look at this example,
 | ocean | 0.20        | 0.91        | 0.18        |
 | rock  | -0.76       | 0.08        | 0.61        |
 
-At a glance, the number is just random and does not have any meaning. Yet later, after we learn about
-embedding training steps, we will start to see how these numbers can be used to determine similarity
-between words.
+Individually, each coordinate appears random. Together, they specify the word's location in the geometric space.
+This geometric space is also called _embedding space_. In the following sections, we'll see how those locations
+allow the model to measure similarity between words.
 
 #### Initialize Random Vector
 
 Before starting the training steps, each word needs to be assigned with a vector. Let's just use 3 dimensions
-just for this example. Each dimension will have a random vector, which means the model has no prior knowledge
-what these words are and the relationship. The model also doesn't see word as string but token ID from tokenizer.
-Suppose we have vocabulary from the tokenizer like this,
+for this example. Each coordinate is initialized with a random value, so the vectors do not yet encode any
+meaningful relationships between words.
+
+Since the model itself doesn't store words but token ID, let's use this table as reference for token ID on
+each word,
 
 | Token ID | Word  |
 | -------- | ----- |
@@ -262,17 +276,16 @@ Then our embedding vector table would look like this,
 | 11       | -0.761      | -0.808      | 0.994       |
 | 12       | 0.369       | -0.045      | -0.675      |
 
-Now we have the embedding vector table ready. What happens here, each word has coordinate in a map, they are
-scattered everywhere or maybe close to unrelated words. That is expected since the model hasn't learned anything.
+Now we have the initial embedding vectors. The following figure visualizes their positions in the
+geometric space.
 
 <figure>
   <img src="/images/basic-word-embedding-in-language-model/initial-embedding-vector.png" alt="3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which are scattered in different directions before training.">
-  <figcaption>Figure 1. Initial token embeddings before training.</figcaption>
+  <figcaption>Figure 1. Initial positions of the word vectors before training. </figcaption>
 </figure>
 
 We have our data ready for training, the next step is designing how the training should be
-done. Since we have converted all input into number, the training steps will use a lot of number operation
-or math here.
+done. Since we have converted all input into number, the training steps will involve quite a bit of mathematics.
 
 [![Snoopy smile with tears by hibikicakes1](/images/basic-word-embedding-in-language-model/snoopy.gif)](https://tenor.com/view/snoopy-gif-1199808039773969830)
 
@@ -435,13 +448,13 @@ Once we updated vector A, let's use the new Vector A to calculate using dot prod
 improvement
 
 ```
-Vector A(Sun) ⋅ Vector B(Raise) = (0.624183 * 0.150) + (-0.679119 * 0.061) + (-0.73514 * -0.905)
-Vector A(Sun) ⋅ Vector B(Raise) = 0.717503
+Vector A(Sun) ⋅ Vector B(Rise) = (0.624183 * 0.150) + (-0.679119 * 0.061) + (-0.73514 * -0.905)
+Vector A(Sun) ⋅ Vector B(Rise) = 0.717503
 Sigmoid(0.717503) = 0.672041
 ```
 
-Well, that's an improvement. Previously we got 0.592111 and now we get 0.672041. This shows the model gain
-more confident on its prediction. What about the wrong pair of "Sun" and "Wave" ? We follow the same steps but
+Well, that's an improvement. Previously we got 0.592111 and now we get 0.672041. This shows the model gains
+more confidence in its prediction. What about the wrong pair of "Sun" and "Wave" ? We follow the same steps but
 the only different is we set the target to 0.0 because we want the similarity to be as low as possible.
 
 #### Subtle Improvement
@@ -455,7 +468,7 @@ is placed on the same line with words "Rise", "Glow", and "Ocean". We have the f
 - Line 7, "sun glow ocean"
 
 On Figure 1, we can see "Sun" and "Ocean" are facing different direction, when two vectors point to a different direction
-then the error will be large, when the error is large, the model will update the vector agressively to make
+then the error will be large, when the error is large, the model will update the vector aggressively to make
 vector of "Sun" as close as possible to vector of "Ocean". In other words, when "Sun" is already more aligned with
 "Rise", it will instead move in direction of "Ocean" while at the same time being less aligned with "Rise" vector.
 
@@ -550,7 +563,7 @@ our initial questions:
 > The number is a vector and initially it was just random number, then during training the number is updated so it points
 > to similar direction. 
 
-2. What it means to the model?
+2. What do they mean to the model?
 
 > The model doesn't know word as human did. Hence it doesn't read like human but treat it as a vector. At a glance,
 > the number seems random, but if we apply a mathematical formula like Cosine similarity, the model is able to
