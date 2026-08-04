@@ -15,7 +15,7 @@ Embedding model. It gave some introduction about what embedding is and why it ma
 However, when I saw a demo of using embedding model, I got confused instead. Take this example,
 
 ```
-star -> [0.535; 2.098; -0.484]
+sun -> [5.625; -2.911; 0.237]
 ```
 
 _"How come that is the result? What just happened? What those numbers represent?"_
@@ -66,10 +66,10 @@ matter as long as they face the same direction.
 Recall the earlier example,
 
 ```
-star -> [0.535; 2.098; -0.484]
+sun -> [5.625; -2.911; 0.237]
 ```
 
-I wonder how those numbers are related to a word "stars", is it a unicode? ID for each character? I can't
+I wonder how those numbers are related to a word "sun", is it a unicode? ID for each character? I can't
 figure. I know that it has something to do with [helping](https://huggingface.co/blog/getting-started-with-embeddings)
 a language model to find reference as an answer or ranking similarity, yet my mind keep stuck on wondering these
 questions:
@@ -466,4 +466,107 @@ making large jumps. So how do we prevent this? We basically tells the model to r
 How? By adding another small number in the formula we use to update the vector. This number is called [Learning Rate](https://medium.com/thedeephub/learning-rate-and-its-strategies-in-neural-network-training-270a91ea0e5c).
 
 While there are many techniques to specify learning rate, we focus on main purpose here: **to make each update
-smaller so the vector changes more carefully during training.**
+smaller so the vector changes more carefully during training.** Hence, the formula is:
+
+```
+Vector A(i) = Vector A(i) + learning rate * error × Vector B(i)
+```
+
+The value of Learning Rate here can be anything, as long as it doesn't cause the problem we have discussed.
+I used 0.1 as a start and then adjust the epochs to get a better result of the training.
+
+## Training Results
+
+After many epochs, the vector pairs slowly aligned to points to the same direction and the model prediction gets
+better to determine relationship between words correctly based on the dataset. This is how embedding vectors
+for "Sun", "Rise", and "Wave" look like now after training:
+
+<figure>
+  <img src="/images/basic-word-embedding-in-language-model/trained-sun-vector.png" alt="3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is larger than the angle between sun and rise.">
+  <figcaption>Figure 3. Sun aligns more with rise than wave.</figcaption>
+</figure>
+
+When comparing with Figure 2, we notice that "Sun" is now more aligned with "Rise" than with "Wave". This shows
+the model is able to predict the words relationship better. After training, the whole embedding vector will look
+like this,
+
+<figure>
+  <img src="/images/basic-word-embedding-in-language-model/trained-embedding-vector.png" alt="3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which has more aligned directions after training.">
+  <figcaption>Figure 4. Token embeddings after training.</figcaption>
+</figure>
+
+Notice that "Sun", "Rise", and "Glow" now point in similar directions. "Ocean" also points in a roughly similar
+direction, although not as closely aligned as "Rise" or "Glow". This makes sense because the word "Ocean" appears
+with "Sun" in one sentence, but it also appears with "Fish", "Swim", "Wave", and "Boat". During training, the embedding
+is influenced by all of these relationships rather than just one word pair. So how does the model able to
+determine the vectors similarity?
+
+## Calculating Similarity
+
+During training, updating one vector by adding a portion of another changes both its direction and its length.
+The goal, however, is to make **vectors of related words** point in similar directions. The change in vector
+length is simply a side effect of the update process. As shown in Figure 4, the vectors do not necessarily have
+the same length, yet they point in similar directions.
+
+Can we compare only the direction of two vectors? Yes. This is where we use a formula called
+[Cosine Similarity](https://www.geeksforgeeks.org/dbms/cosine-similarity/),
+which measures how closely two vectors point in the same direction while ignoring their lengths.
+
+Cosine similarity ranges from -1.0 to 1.0. A value close to 1.0 means two vectors point in nearly
+the same direction, a value close to 0 means their directions are unrelated, and a value close to -1.0
+means they point in opposite directions.
+
+To see how this works, let's compare the word **"Sun"** with the other words in the trained embedding.
+
+| Word  | Cosine Similarity |
+| ----- | ----------------- |
+| Glow  | 0.905             |
+| Rise  | 0.811             |
+| Ocean | 0.426             |
+| Fish  | -0.188            |
+| Swim  | -0.190            |
+
+The result matches what we observed in Figure 4. The vectors of **"Glow"** and **"Rise"** point in nearly the
+same direction as **"Sun"**, so they receive high similarity scores. Although **"Rise"** has a different vector
+length from **"Sun"**, it is still considered similar because cosine similarity compares only their directions.
+
+The word **"Ocean"** still has a positive similarity because it appears together with **"Sun"** in the dataset.
+However, its score is lower because **"Ocean"** also appears with words such as **"Fish"**, **"Swim"**, **"Wave"**,
+and **"Boat"**. These additional relationships pull its vector toward a different direction, making it less aligned
+with **"Sun"** than **"Glow"** or **"Rise"**.
+
+Finally, **"Fish"** and **"Swim"** receive negative similarity scores because their vectors point in almost the
+opposite direction from **"Sun"**. Even though they are related to **"Ocean"**, they do not share the same context
+as **"Sun"**, so the model learns to place them in a different region of the embedding space.
+
+## Final Answers
+
+So that's how vectors are produced in embedding model and using it to determine its similarity. Let's revisit
+our initial questions:
+
+1. How those numbers are produced?
+
+> When the model gets an input of a word. It will convert it into a token ID then search the embedding vector for that token.
+> The number is a vector and initially it was just random number, then during training the number is updated so it points
+> to similar direction. 
+
+2. What it means to the model?
+
+> The model doesn't know word as human did. Hence it doesn't read like human but treat it as a vector. At a glance,
+> the number seems random, but if we apply a mathematical formula like Cosine similarity, the model is able to
+> predict what other vectors are pointing to similar direction like the input vector. The model then predict that is
+> the related words.
+
+3. If those numbers are just random, why don't we just assign a random number for each word instead of using
+   an embedding model?
+
+> At a glance, the number seems random, but it is actually a representation of what the model has learned.
+> If we apply a mathematical formula like Cosine similarity, the model is
+> able to predict what other vectors are pointing to similar direction like the input vector. The model then predict
+> that is the related words.
+
+I have written the simple POC program [here](https://codeberg.org/ky64/basic-language-model/src/branch/main/demo/embedding). 
+This learning takes time, I just finished this despite Claude Opus 5 already released. I haven't touched the
+transformer yet to understand when the model stops paying attention, and also how tool calling works. This may
+give me a broad perspective how a vector plays a big role in a language model. Let's keep learning the principle
+first!
