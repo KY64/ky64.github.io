@@ -1,6 +1,6 @@
 ---
 layout: "blog.njk"
-title: How Word Embedding Vectors Are Produced
+title: How Vectors Are Produced In An Embedding Model
 description: Learn how word embedding vectors are initialized, scored with dot products, and updated through a simple training loop.
 image: /images/basic-word-embedding-in-language-model/trained-embedding-vector.png
 imageAlt: Three-dimensional plot of trained word embedding vectors grouped by the words that appear together in the training data.
