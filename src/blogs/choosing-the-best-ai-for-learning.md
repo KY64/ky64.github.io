@@ -101,26 +101,77 @@ and focus on one main idea in plain english. Here is the result:
 
 When I tested this, I found that Gemini Flash 3.6 often gives a longer response unlike Gemini Flash-lite 3.5
 which is more casual like I expected. I used Gemini here due to its multimodal model and I'm already
-a Google user.
+a Google user. Another thing is, Google has search engine and Gemini is able to find any source quickly if
+I ask for it. Which is like the other LLM but I pick this one just because I already signed up.
 
-Setting up Gemini behavior can be done here https://gemini.google.com/saved-info Though note that it will
+Setting up Gemini behavior can be done here https://gemini.google.com/saved-info though note that it will
 rewrite your input so the end result will be different. This is mine:
 
 ![Gemini Instructions](/images/choosing-the-best-ai-for-learning/gemini-instructions.png)
 
 ### Structured Learning
 
-Whenever I have some free time and want to dive into certain topics, I make a habit to reach out to LLM to
+Whenever I want to dive into certain topics, I make a habit to reach out to LLM to
 help me discover what articles I should read. I do this because sometimes every result in search engine
 is not giving the clear answer, or I find it lacking of depth. So this is where LLM could be helpful to
-point which article I should to answer certain questions.
+point which article I should read.
 
-However, reading an article is often require me to infer the writer hidden assumption. Like maybe the writer
+However, reading an article is often requires me to infer the writer hidden assumption. Like maybe the writer
 already assumes the reader familiar with certain term, has specific educational background, or capable to
 decipher what the writer means. This cause me fatigue before I can find the real answer.
 
-Whenever I felt overwhelm with a certain topic, books, or any information, I often ask "how is it true?",
+When I felt overwhelm with a certain topic, book, or any information, I often ask "how is it true?",
 "where should I start from?", "what is the basic?". This requires me to have someone to sit with me and patiently
 teach me like I'm an elementary student. I don't know what I don't know so I need others to discover that.
 This is where LLM becomes really useful for me.
 
+So when I started the interaction, I prefer to discuss a study plan first. The LLM will diagnose what is
+my struggle, knowledge gap, and my goal. After that it gives me a plan from the basic until how the answer/solution
+was invented. It's not stopping there, it should also explains its practical usage.
+
+Before the learning session ends, there is an evaluation where I get some quiz about the basics,
+reframe the answer using general terms, and test me to ask critical questions from a given scenario. This helps
+me to retain what I have learned.
+
+How I achieve this is by using this prompt:
+https://codeberg.org/ky64/agent-prompts/src/branch/main/teaching/prompt.txt
+
+It is pretty long because this is explaining my preference on how I want to learn things. So whenever I started
+a new chat session, the very first message always:
+
+```
+Follow this system prompt:
+
+[PROMPT]
+```
+
+I replace the **[PROMPT]** with my saved prompt that I shared earlier. After that, the LLM will switch into
+'learning mode' but with the behavior that I prefer. Here is a snippet of the interaction:
+
+![Qwen Study Plan](/images/choosing-the-best-ai-for-learning/qwen-study-plan.png)
+
+So the study plan here will keep us aligned what is the expectation and tailor the concept from previous
+explanation. The learning session looks like this:
+
+![Qwen Learning Session](/images/choosing-the-best-ai-for-learning/qwen-learning-session.png)
+
+I use Qwen here because it allows me to have long session chat even with free tier. Previously I used Gemini Flash
+but lately it often overlook the past conversation so it didn't follow the learning plan. I also tried
+ChatGPT, I was using subscription plan and it was good actually yet the free tier has limited time and often
+requires me to create a new chat to continue. Qwen here is consistent despite I'm on free tier. It's able to
+recall the past conversation correctly, like ChatGPT but with more generous free tier limit.
+
+The problem with Qwen is, although it is a multimodal model, it can't help me to visualize its explanation
+properly. So I have to move to Gemini Flash to have a quick chat to ask question then visualize the
+answer.
+
+So for this structured learning, I think the ideal model should have these specific requirements:
+
+- Long context limit (> 256k token)
+- Multimodal for visualizing the explanation
+- Instruction following for adhering to user preferred way to learn
+- Speed for keeping the user in the flow instead of waiting for too long
+
+Qwen 'thinking mode' is slow, but its 'fast mode' is similar to ChatGPT speed.
+
+### Mastery
