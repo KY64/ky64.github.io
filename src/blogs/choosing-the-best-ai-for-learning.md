@@ -185,22 +185,18 @@ feedback and can discuss the results.
 
 ## Conclusion
 
-So that is how I customize LLM to be my learning assistant. It shows that it is possible to make it align
-with how we want to learn. Changing it to be a better mentor or even a partner who challenge our understanding.
+Choosing an LLM isn't about finding the 'perfect' AI brand or surrendering your thinking process. It's about
+taking control of how you learn. By using custom prompts, we can shape the model's behavior, transforming
+it from a passive text generator into a humble mentor or a meticulous partner who scrutinizes our understanding.
 
-My pick of LLM here is very opinionated, not saying these are the best but it is meeting my expectation. So
-the principle is knowing what we need, our learning style then we can start writing it out as a prompt. Try
-pass that prompt to current LLM we've been using then judge the result. We don't need to be tied to a single
-LLM since each has its own strength.
+My model preferences are subjective, but the core principle is universal: identify your learning goal, write a
+prompt that enforces that behavior, and test it in your preferred LLM. You don't need expensive
+subscriptions when you have a clear strategy.
 
-I also want to mention one article that I recently read about learning using LLM:
+As quoted in a [Fordham Institute article](https://fordhaminstitute.org/national/commentary/illusion-learning-danger-artificial-intelligence-education),
+AI is *"a knowledge amplifier, not a knowledge substitute."* Real learning requires active participation.
+Whether you're using a casual lookup, a structured study plan, or a thorough examination session, always
+hold to one rule: find out how the model arrived at that answer.
 
-https://fordhaminstitute.org/national/commentary/illusion-learning-danger-artificial-intelligence-education
-
-It says, AI is *"a knowledge amplifier, not a knowledge substitute"*. So it means everytime we want to learn
-something using LLM, make sure we are an active participant not just merely accepting the answer. We can
-ask for source to read or even switch the learning mode from teaching to probing questions. Just like how
-I differentiate prompt for Structured Learning and Mastery.
-
-I hope this article and my personal experience can help you to learn better with LLM and save you some cost.
-Keep learning!
+I hope these workflows help you learn deeper, build real mental models, and save money along the way. Keep
+learning!
