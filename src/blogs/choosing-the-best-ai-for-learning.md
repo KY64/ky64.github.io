@@ -155,32 +155,33 @@ answer.
 
 ### Mastery
 
-I often feel like I already know something. Yet at the same time, I always reminded of [2nd Order of Ignorance](https://cacm.acm.org/opinion/the-five-orders-of-ignorance/).
-Which is "I don't know what I don't know" or *unknown unknowns*. This often happen when I faced with a problem
-and suddenly dumbfounded how the problem occurs, and even inexpicably solved when I just blink at it. I
-don't want that to happen again but at the same time I don't know what is the right question to ask and where
-to start. Finding out what I don't know is very hard, and it is often giving me illusion of mastery.
+I often feel like I already understand a concept, even confidently. Yet at the same time, I'm always reminded
+of the [2nd Order of Ignorance](https://cacm.acm.org/opinion/the-five-orders-of-ignorance/):
+*"I don't know what I don't know,"* or the *unknown unknowns*. This often happens when I am faced with
+a problem and am suddenly dumbfounded on how the problem occurs, and even inexplicably solved when I just blink
+at it. I don't want that to happen again but at the same time I don't know what is the right question to ask
+and where to start. Finding out what I don't know is very hard, and it is often giving me an illusion of mastery.
 
-So every time I doubt my knowledge or even confident with it, I expect someone to argue, challenge, and
-point out how flawed my logic is. In this case, I started to use LLM not to be my assistant but to be a
-tool to probe me with questions and scrutinize my answer. It is like roleplaying with your killer professor
+So every time I doubt my knowledge or even feel confident with it, I expect someone to argue, challenge, and
+point out how flawed my logic is. In this case, I experimented with using an LLM not to be my assistant but to be a
+tool to probe me with questions and scrutinize my answer. It is like roleplaying with your meticulous professor
 to defend your thesis.
 
-I honestly impressed because this is actually working, if we use a model with very good reasoning capability
-like equal to or above [GPT 5.4](https://openai.com/index/introducing-gpt-5-4/) then it can probe us many
+I was honestly impressed to find out it was actually working, if we use a model with very good reasoning capability
+similar to [GPT 5.4](https://openai.com/index/introducing-gpt-5-4/) or better, then it can probe us with many
 critical questions. However, of course I have to create a prompt what kind of questions need to be asked
 and what is to evaluate.
 
-I wrote my prompt here https://codeberg.org/ky64/agent-prompts/src/branch/main/examiner/prompt.txt
+I wrote another [custom prompt](https://codeberg.org/ky64/agent-prompts/src/branch/main/examiner/prompt.txt)
 which is very long since I want the model to clearly understand what to do. I tested this using Qwen
-model and it is able to challenge and evaluate my answers. You can check here:
+model and it is able to [challenge and evaluate](https://chat.qwen.ai/s/33362c91-73f0-48eb-bdea-963aa7152887?fev=0.2.91)
+my answers.
 
-https://chat.qwen.ai/s/33362c91-73f0-48eb-bdea-963aa7152887?fev=0.2.91
-
-This is when I tell LLM not to be 'helpful' neither agreeable. I honestly often felt stressful since I
-need to clearly type my answer. One vague word will cause my score low and considered incapable. Quite
-annoying but that is part of the design for mastery. However, at the end of the probing session, there
-is evaluation where I can get feedback and discuss about it.
+This is the scenario where I instruct the LLM to be neither helpful nor agreeable. I honestly often find it
+stressful because I need to type my answers with precise meaning. A single vague word will cause my score
+to drop and mark me as incapable. It can be quite annoying, but that friction is by design for true mastery.
+Fortunately, at the end of the probing session, there is an evaluation phase where I get constructive
+feedback and can discuss the results.
 
 ## Conclusion
 
