@@ -175,3 +175,52 @@ So for this structured learning, I think the ideal model should have these speci
 Qwen 'thinking mode' is slow, but its 'fast mode' is similar to ChatGPT speed.
 
 ### Mastery
+
+I often feel like I already know something. Yet at the same time, I always reminded of [2nd Order of Ignorance](https://cacm.acm.org/opinion/the-five-orders-of-ignorance/).
+Which is "I don't know what I don't know" or *unknown unknowns*. This often happen when I faced with a problem
+and suddenly dumbfounded how the problem occurs, and even inexpicably solved when I just blink at it. I
+don't want that to happen again but at the same time I don't know what is the right question to ask and where
+to start. Finding out what I don't know is very hard, and it is often giving me illusion of mastery.
+
+So every time I doubt my knowledge or even confident with it, I expect someone to argue, challenge, and
+point out how flawed my logic is. In this case, I started to use LLM not to be my assistant but to be a
+tool to probe me with questions and scrutinize my answer. It is like roleplaying with your killer professor
+to defend your thesis.
+
+I honestly impressed because this is actually working, if we use a model with very good reasoning capability
+like equal to or above [GPT 5.4](https://openai.com/index/introducing-gpt-5-4/) then it can probe us many
+critical questions. However, of course I have to create a prompt what kind of questions need to be asked
+and what is to evaluate.
+
+I wrote my prompt here https://codeberg.org/ky64/agent-prompts/src/branch/main/examiner/prompt.txt
+which is very long since I want the model to clearly understand what to do. I tested this using Qwen
+model and it is able to challenge and evaluate my answers. You can check here:
+
+https://chat.qwen.ai/s/33362c91-73f0-48eb-bdea-963aa7152887?fev=0.2.91
+
+This is when I tell LLM not to be 'helpful' neither agreeable. I honestly often felt stressful since I
+need to clearly type my answer. One vague word will cause my score low and considered incapable. Quite
+annoying but that is part of the design for mastery. However, at the end of the probing session, there
+is evaluation where I can get feedback and discuss about it.
+
+## Conclusion
+
+So that is how I customize LLM to be my learning assistant. It shows that it is possible to make it align
+with how we want to learn. Changing it to be a better mentor or even a partner who challenge our understanding.
+
+My pick of LLM here is very opinionated, not saying these are the best but it is meeting my expectation. So
+the principle is knowing what we need, our learning style then we can start writing it out as a prompt. Try
+pass that prompt to current LLM we've been using then judge the result. We don't need to be tied to a single
+LLM since each has its own strength.
+
+I also want to mention one article that I recently read about learning using LLM:
+
+https://fordhaminstitute.org/national/commentary/illusion-learning-danger-artificial-intelligence-education
+
+It says, AI is *"a knowledge amplifier, not a knowledge substitute"*. So it means everytime we want to learn
+something using LLM, make sure we are an active participant not just merely accepting the answer. We can
+ask for source to read or even switch the learning mode from teaching to probing questions. Just like how
+I differentiate prompt for Structured Learning and Mastery.
+
+I hope this article and my personal experience can help you to learn better with LLM and save you some cost.
+Keep learning!
