@@ -23,11 +23,11 @@ or tutorial, I will ask LLM to teach me. If that fails my expectation, what if I
 tutorial first, then for diving deeper, I'll try to reach LLM. Without paying a single penny, of course.
 
 My first experience was that, it was helpful but too eager to answer. So the tone and explanation a bit like
-lecturing and using a lot of academical or technical jargon. Over time, it is slowly adapting to my preference.
-However, when I created a new session, it is not always giving a consistent behavior. So I started experimenting
+lecturing and using a lot of academical or technical jargon. Over time, it was slowly adapting to my preference.
+However, when I created a new session, it was not always giving a consistent behavior. So I started experimenting
 to craft a prompt which explained how I want to learn, how it should teach me, and how it should evaluate my
 understanding. Hoping that LLM could finally become my solution for the missing part in my learning process.
-A mentor who is always ready not just to answer but gently guide, one baby step at a time also ready to listen
+A mentor who is always ready not just to answer but gently guide, one baby step at a time also ready to answer
 any hillarious hypothetical questions.
 
 You don't need a paid subscription to access top-tier AI models, and neither do I. Once you know how to
