@@ -3,7 +3,7 @@ layout: 'blog.njk'
 title: Choosing the Best Free AI For Learning
 description: Most AI guides push paid subscriptions, but free models can be reliable tutors if you know how to use them.
 tags: blog
-date: 2026-09-18
+date: 2026-09-20
 ---
 
 # Choosing the Best Free AI For Learning
@@ -15,11 +15,24 @@ was invented. Moreover, I don't know how to use each information I learn in prac
 
 Since the booming of AI or specifically *Large Language Model* (LLM), I was skeptical due to a lot of
 misinformation and hallucination. Yet since early 2026, most people relying on LLM daily just like
-how they rely on search engine to find answers. The model gets smarter and reliable, though still not free
-from hallucination.
+how they rely on search engine to find answers, even doing research. The model gets smarter and reliable,
+though still not free from hallucination.
 
-I started to change how I learn. Instead of just relying on tutorial and books, I also included LLM to be my
-mentor. So this article shares about my experience and tips when learning with LLM.
+I started considering whether I should change how I usually learn. Instead of going straight to the book,
+or tutorial, I will ask LLM to teach me. If that fails my expectation, what if I read a book or follow
+tutorial first, then for diving deeper, I'll try to reach LLM. Without paying a single penny, of course.
+
+My first experience was that, it was helpful but too eager to answer. So the tone and explanation a bit like
+lecturing and using a lot of academical or technical jargon. Over time, it is slowly adapting to my preference.
+However, when I created a new session, it is not always giving a consistent behavior. So I started experimenting
+to craft a prompt which explained how I want to learn, how it should teach me, and how it should evaluate my
+understanding. Hoping that LLM could finally become my solution for the missing part in my learning process.
+A mentor who is always ready not just to answer but gently guide, one baby step at a time also ready to listen
+any hillarious hypothetical questions.
+
+You don't need a paid subscription to access top-tier AI models, and neither do I. Once you know how to
+customize a free model, you can transform it into a humble and smart mentor that eases the struggle of
+learning, helping you master complex topics without feeling overwhelmed.
 
 > We will use term **Large Language Model (LLM)** as that is the right term on what is being discussed in
 > this article. You can read more about the term here https://dl.acm.org/doi/epdf/10.1145/3747356
