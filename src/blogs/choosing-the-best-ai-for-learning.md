@@ -66,14 +66,11 @@ to turn it into a thorough examiner.
 
 ## Beyond Default
 
-LLM learns its user preference and habit throughout the time. So user interaction with LLM will feel much
-smoother and it kind of know what we want. For me, I don't want to spend a lot of time just to 'hangout'
-with LLM so it knows what I want and my preference. So instead of interacting a lot with an LLM, I give
-it a long *lecture* on how to behave. I mean a [prompt](https://www.geeksforgeeks.org/artificial-intelligence/what-is-an-ai-prompt/).
-
-This realisation comes after I used a 'learning mode' for each LLM that doesn't suit my learning style, 
-and I have to tell how I want to do it repeatedly. Which eventually force me to create a set of prompt for
-certain type of learning.
+Most people waste time repeatedly typing instructions like 'keep it brief' or 'explain simply' in every new
+chat. Others assume you have to spend weeks chatting with an AI before it 'learns' your style. I don't want
+to spend time 'hanging out' with an AI just so it learns my preferences, nor do I want to constantly remind
+it how to respond. Instead, I give it explicit instructions upfront, like a system prompt. I started
+creating a tailored ruleset for every type of learning.
 
 ### Casual Chat
 
