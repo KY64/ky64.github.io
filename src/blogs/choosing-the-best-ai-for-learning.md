@@ -39,51 +39,30 @@ learning, helping you master complex topics without feeling overwhelmed.
 
 ## Summary
 
-A model intelligence does matter but what matters more is *how* we want to learn. When I was using LLM
-as mentor, my first question is "how do I want to learn this topic?", and it breaks down to 3 types:
+A model's intelligence matters, but what matters more is *how* we want to learn. When using an LLM as a
+mentor, my first question is always "how do I want to learn this topic?"
+
+For me, learning breaks down into 3 distinct types:
 
 1. Casual chat
 2. Structured learning
 3. Mastery
 
-Quite often, the first type can be achieved by any frontier LLM. Which many people already did, treating the
-LLM as replacement for search engine to answer questions. In fact, many free LLM is already good at it, the
-one rule of thumb is always clarify how it finds the answers. Always ask for source to read if possible.
-So prefer to use the hosted model like Gemini, ChatGPT, Mistral, Qwen, or whichever free as long as the
-model is able to search the source from internet.
+For **casual chat**, I prefer to use hosted models like Gemini, ChatGPT, Mistral, Qwen, or whichever free
+as long as the model is able to search the source from internet to verify facts. My pick is Gemini Flash
+since I already have a Google account, not because it is the best. Also it is multimodal so I can take picture
+and quickly find out about it.
 
-For structured learning, there are several things to consider: context limit, multimodal, instruction following
-and speed. Learning requires building mental model and presenting a lot of new information. This session
-often last for more than half an hour. So model with large context limit should be sufficient. Usually more
-than 256k context limit. Also visualization often helps explain complicated topics, so if the model able to
-visualize its explanation, that helps a lot. Another thing, I usually describe how I want to proceed the
-learning step by step. I always give [a guideline](https://codeberg.org/ky64/agent-prompts/src/branch/main/teaching/prompt.txt) to start.
-If the model is able to dilligently follow the instruction, that could increase the learning experience.
-Last but not least, when we are already in the 'flow', the model should be able to keep up. So response speed
-matters, though doesn't necessarily mean faster is better.
+For **structured learning**, there are several things to consider: long context limit, multimodal, instruction
+following and speed. Visualization also helps explain complicated topics, so a model's ability to render visual
+diagrams is a major plus. I always give a guideline to start. For this case, I choose
+Qwen because I could have long-session chat without being limited.
 
-For the third type, mastery, it is the same like the one I use for structured learning with one additional
-requirement: reasoning. Mastery requires us to be able to argue, asking right questions, transfer knowledge,
-and understand tradeoff. So I choose the model which has good reasoning so I could use it to argue with me,
-challenge my understanding, and point out my logical flaw. I also use a [prompt](https://codeberg.org/ky64/agent-prompts/src/branch/main/examiner/prompt.txt)
-to change how the model interacts with me.
-
-Those guidelines should be enough to determine which LLM provider we choose. We can use the free one by giving
-the right prompt and it will act like a good mentor for studying. Since I don't sign up to many providers, I
-only use few LLM for each types of learning:
-
-1. Casual Chat - [Gemini Flash](https://gemini.google.com/)
-2. Structured Learning - [Qwen](https://chat.qwen.ai/)
-3. Mastery - [Qwen](https://chat.qwen.ai/)
-
-I focus on long session chat with free usage. ChatGPT has free tier but quite limited. So I use
-Qwen which has good reasoning capability and long context limit. Also pretty stable. The cons is just
-for visualization, Gemini Flash does it better. Gemini Flash struggles with long conversation
-and often overlook the past interaction, but for a short conversation, it's good enough. Just like someone
-insightful you'd talk to on a bus ride.
-
-See one of my session with Qwen here:
-https://chat.qwen.ai/s/33362c91-73f0-48eb-bdea-963aa7152887?fev=0.2.91
+For **mastery**, it is the same like the one I use for structured learning with one additional requirement:
+reasoning. Mastery requires us to be able to argue, asking right questions, transfer knowledge,
+and understand tradeoff. I choose a model with strong reasoning capabilities that can argue with me,
+challenge my assumptions, and point out logical flaws. I use Qwen here as well, giving it a custom prompt
+to turn it into a thorough examiner.
 
 ## Beyond Default
 
