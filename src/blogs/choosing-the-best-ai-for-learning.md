@@ -70,33 +70,34 @@ Most people waste time repeatedly typing instructions like 'keep it brief' or 'e
 chat. Others assume you have to spend weeks chatting with an AI before it 'learns' your style. I don't want
 to spend time 'hanging out' with an AI just so it learns my preferences, nor do I want to constantly remind
 it how to respond. Instead, I give it explicit instructions upfront, like a system prompt. I started
-creating a tailored ruleset for every type of learning.
+creating a ruleset and principles for every type of learning.
 
 ### Casual Chat
 
-Sometimes I want to know something, just for the sake of knowing. Not really want to read through a lot of
-textbook materials. LLM often gives me a long lecture when I ask about scientific question, but I only
+Sometimes I want to know something, just for the sake of knowing. I don't really want to read through a lot of
+textbook materials. An LLM often gives me a long lecture when I ask a scientific question, but I only
 care about plain and casual explanation without getting overwhelmed. So what I did is often add a prefix "explain to me
-plainly...". While this is working, what if I can just type less what I want to know without telling it
-how I want to know about it.
+plainly...". While this is working, what if I can just type less about what I want to know without telling it
+how I want to know about it?
 
-For this case, I usually set the default behavior for the LLM by using a custom prompt:
-https://codeberg.org/ky64/agent-prompts/src/branch/main/behavior/prompt.txt
-
+For this case, I usually set the default behavior for the LLM by using a [custom prompt](https://codeberg.org/ky64/agent-prompts/src/branch/main/behavior/prompt.txt).
 The result would be different for each LLM, but basically, I want the response to be as short as possible
-and focus on one main idea in plain english. Here is the result:
+and focus on one main idea in plain English. I used Gemini here due to its multimodal model and I'm already
+a Google user. Another thing is, Google has search engine and Gemini is able to find any source quickly if
+I ask for it.
+
+I set up Gemini behavior using my custom prompt. It can be done in [Gemini Instructions](https://gemini.google.com/saved-info)
+though note that it will rewrite your input so the end result will be different. This is mine:
+
+![Gemini Instructions](/images/choosing-the-best-ai-for-learning/gemini-instructions.png)
+
+Here is the result:
 
 ![Gemini Chat](/images/choosing-the-best-ai-for-learning/gemini-chat.png)
 
 When I tested this, I found that Gemini Flash 3.6 often gives a longer response unlike Gemini Flash-lite 3.5
-which is more casual like I expected. I used Gemini here due to its multimodal model and I'm already
-a Google user. Another thing is, Google has search engine and Gemini is able to find any source quickly if
-I ask for it. Which is like the other LLM but I pick this one just because I already signed up.
-
-Setting up Gemini behavior can be done here https://gemini.google.com/saved-info though note that it will
-rewrite your input so the end result will be different. This is mine:
-
-![Gemini Instructions](/images/choosing-the-best-ai-for-learning/gemini-instructions.png)
+which is more casual like I expected. My preference is Flash-lite 3.5 response since it can answer in plain
+and direct way. You are welcome to customise and choose your own LLM according to your taste.
 
 ### Structured Learning
 
