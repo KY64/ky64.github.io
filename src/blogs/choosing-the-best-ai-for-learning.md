@@ -30,7 +30,7 @@ understanding. Hoping that LLM could finally become my solution for the missing 
 A mentor who is always ready not just to answer but gently guide, one baby step at a time also ready to answer
 any hillarious hypothetical questions.
 
-You don't need a paid subscription to access top-tier AI models, and neither do I. Once you know how to
+You don't need a paid subscription to access top-tier LLM models, and neither do I. Once you know how to
 customize a free model, you can transform it into a humble and smart mentor that eases the struggle of
 learning, helping you master complex topics without feeling overwhelmed.
 
@@ -66,25 +66,25 @@ to turn it into a thorough examiner.
 
 ## Beyond Default
 
-Most people waste time repeatedly typing instructions like 'keep it brief' or 'explain simply' in every new
-chat. Others assume you have to spend weeks chatting with an AI before it 'learns' your style. I don't want
-to spend time 'hanging out' with an AI just so it learns my preferences, nor do I want to constantly remind
-it how to respond. Instead, I give it explicit instructions upfront, like a system prompt. I started
-creating a ruleset and principles for every type of learning.
+Most people repeatedly typing instructions like 'keep it brief' or 'explain simply' in every new
+chat. Others assume you have to spend weeks chatting with an LLM before it 'learns' your style. I don't want
+to spend time 'hanging out' with an LLM just so it learns my preferences, nor do I want to constantly remind
+it how to respond. Instead, I give it explicit instructions upfront or setup a custom prompt to change its
+default behavior to my preference. Since each type of learning has a different instructions and principles,
+I created a set of prompts that can be reusable whenever I need LLM to help me learning something.
 
 ### Casual Chat
 
 Sometimes I want to know something, just for the sake of knowing. I don't really want to read through a lot of
 textbook materials. An LLM often gives me a long lecture when I ask a scientific question, but I only
-care about plain and casual explanation without getting overwhelmed. So what I did is often add a prefix "explain to me
-plainly...". While this is working, what if I can just type less about what I want to know without telling it
-how I want to know about it?
+care about plain and casual explanation without getting overwhelmed. So what I did often is adding a prefix
+"explain to me plainly...". While this is working, what if I can just type less about what I want to know
+without telling it how I want to know about it?
 
 For this case, I usually set the default behavior for the LLM by using a [custom prompt](https://codeberg.org/ky64/agent-prompts/src/branch/main/behavior/prompt.txt).
 The result would be different for each LLM, but basically, I want the response to be as short as possible
 and focus on one main idea in plain English. I used Gemini here due to its multimodal model and I'm already
-a Google user. Another thing is, Google has search engine and Gemini is able to find any source quickly if
-I ask for it.
+a Google user. Also, Gemini is able to find any source quickly if I ask for it.
 
 I set up Gemini behavior using my custom prompt. It can be done in [Gemini Instructions](https://gemini.google.com/saved-info)
 though note that it will rewrite your input so the end result will be different. This is mine:
@@ -134,7 +134,7 @@ will make the model to be specialised as mentor. Let's say someday you ask it to
 to respond with diagnosing your confusion then provide you study plan about why planning a trip is so necessary
 and how to do it better.
 
-This is my interaction after sending the custom prompt:
+This is the example on how it gives me study plan after diagnosing my struggle and goal:
 
 ![Qwen Study Plan](/images/choosing-the-best-ai-for-learning/qwen-study-plan.png)
 
@@ -174,8 +174,26 @@ and what is to evaluate.
 
 I wrote another [custom prompt](https://codeberg.org/ky64/agent-prompts/src/branch/main/examiner/prompt.txt)
 which is very long since I want the model to clearly understand what to do. I tested this using Qwen
-model and it is able to [challenge and evaluate](https://chat.qwen.ai/s/33362c91-73f0-48eb-bdea-963aa7152887?fev=0.2.91)
-my answers.
+model and it is able to challenge and evaluate my answers. This is an example of my interaction:
+
+![Qwen probing questions](/images/choosing-the-best-ai-for-learning/qwen-mastery-probing.png)
+
+The model is being thorough if my answer is too vague, it didn't correct me but clarify my answer. This probing
+questions would go on until 9 or more questions before it enters into focused evaluation where I will be given
+a feedback for each question that I answered. See the picture below:
+
+![Qwen focused evaluation](/images/choosing-the-best-ai-for-learning/qwen-mastery-focused-evaluation.png)
+
+This evaluation phase will identify my weakness and knowledge gap. Which helps me discover what I don't know
+about. During per question evaluation, I can also learn with the mentor and clarify anything I still don't
+grasp about the concept. After that it will proceed to evaluate my answer on next question. At the end of the session
+is the overall evaluation about my depth of my knowledge like this:
+
+![Qwen summary report](/images/choosing-the-best-ai-for-learning/qwen-mastery-report-summary.png)
+
+Moreover, it also suggests me what should I learn and dive deeper to close the gap.
+
+![Qwen study suggestions](/images/choosing-the-best-ai-for-learning/qwen-mastery-study-suggestion.png)
 
 This is the scenario where I instruct the LLM to be neither helpful nor agreeable. I honestly often find it
 stressful because I need to type my answers with precise meaning. A single vague word will cause my score
@@ -185,15 +203,16 @@ feedback and can discuss the results.
 
 ## Conclusion
 
-Choosing an LLM isn't about finding the 'perfect' AI brand or surrendering your thinking process. It's about
-taking control of how you learn. By using custom prompts, we can shape the model's behavior, transforming
-it from a passive text generator into a humble mentor or a meticulous partner who scrutinizes our understanding.
+So that's that. I'm able to find a tool to help me learn better. A tool that challenges my thoughts, and
+point me what am I lacking off. Of course, this doesn't mean I solely use LLM but always find a source
+to read about and if I happen to meet someone knowledgeable in that field, I'd ask the same questions to
+clarify the answers.
 
-My model preferences are subjective, but the core principle is universal: identify your learning goal, write a
-prompt that enforces that behavior, and test it in your preferred LLM. You don't need expensive
-subscriptions when you have a clear strategy.
+My LLM picks here is very opinionated, but the core principle here is: identify your learning goal,
+write a prompt that enforces that behavior, and test it with your preferred LLM. You don't need expensive
+subscriptions when you can give it a clear prompt.
 
-As quoted in a [Fordham Institute article](https://fordhaminstitute.org/national/commentary/illusion-learning-danger-artificial-intelligence-education),
+A quote from [Fordham Institute article](https://fordhaminstitute.org/national/commentary/illusion-learning-danger-artificial-intelligence-education),
 AI is *"a knowledge amplifier, not a knowledge substitute."* Real learning requires active participation.
 Whether you're using a casual lookup, a structured study plan, or a thorough examination session, always
 hold to one rule: find out how the model arrived at that answer.
