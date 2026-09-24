@@ -12,6 +12,33 @@ export default function (eleventyConfig) {
     (date) => new Date(date).toISOString().split("T")[0],
   );
 
+  // Build the side table of contents from the rendered article HTML. Only h2
+  // and h3 are listed (h3 indented as a subsection); the h1 is the page title.
+  // The markdown-it heading rules below emit a stable shape, so the headings
+  // can be read back out of the rendered HTML:
+  //   <h2 id="slug"><a href="#slug">Title</a></h2>
+  // Returns "" when the article has no h2/h3, so the TOC is simply omitted.
+  eleventyConfig.addFilter("toc", (html) => {
+    const headingPattern = /<h([23]) id="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/g;
+    const headings = [];
+    for (const [, level, id, inner] of html.matchAll(headingPattern)) {
+      // Drop the anchor the heading rules wrap the title in.
+      const title = inner
+        .replace(/^<a\b[^>]*>/, "")
+        .replace(/<\/a>\s*$/, "")
+        .trim();
+      headings.push({ level, id, title });
+    }
+    if (headings.length === 0) return "";
+    const items = headings
+      .map(
+        ({ level, id, title }) =>
+          `<li${level === "3" ? ' class="sub"' : ""}><a href="#${id}">${title}</a></li>`,
+      )
+      .join("");
+    return `<ol>${items}</ol>`;
+  });
+
   const md = markdownIt({ html: true, linkify: true, typographer: true });
   const defaultRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
     return self.renderToken(tokens, idx, options);

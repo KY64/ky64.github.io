@@ -6,4 +6,13 @@
       {{ content | safe }}
     {% endblock %}
   </article>
+  {% set tocItems = content | toc %}
+  {% if tocItems %}
+    <div class="toc-wrap">
+      <aside class="toc" aria-label="Table of contents">
+        <h2>On this page</h2>
+        {{ tocItems | safe }}
+      </aside>
+    </div>
+  {% endif %}
 {% endblock %}
