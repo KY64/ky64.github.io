@@ -126,13 +126,30 @@ figcaption {
   line-height: 1.45;
 }
 
+/* Code blocks get their own surface so they read as code rather than prose.
+ * Reuses the table tokens so both containers look related, and both already
+ * adapt to the light and dark schemes. */
 pre {
   max-width: 100%;
+  margin: 1.25em 0;
+  padding: 0.85em 1.1em;
   overflow-x: auto;
+  background: var(--table-surface);
+  border: 1px solid var(--table-border);
+  border-radius: 0.3em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.88em;
+  line-height: 1.48;
 }
 
 pre code {
   overflow-wrap: normal;
+}
+
+pre:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 3px;
 }
 
 .table-scroll {

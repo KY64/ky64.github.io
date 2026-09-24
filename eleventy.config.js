@@ -84,5 +84,15 @@ export default function (eleventyConfig) {
     return `${defaultTableClose(tokens, idx, options, env, self)}</div>`;
   };
 
+  // Code blocks scroll horizontally when a line is wider than the reading
+  // column. Make each one focusable so keyboard users can scroll it, matching
+  // the treatment of .table-scroll above.
+  const defaultFence = md.renderer.rules.fence || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+  };
+  md.renderer.rules.fence = function(tokens, idx, options, env, self) {
+    return defaultFence(tokens, idx, options, env, self).replace("<pre>", '<pre tabindex="0">');
+  };
+
   eleventyConfig.setLibrary("md", md);
 }
