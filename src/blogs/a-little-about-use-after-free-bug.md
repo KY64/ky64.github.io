@@ -124,7 +124,7 @@ releasing memory using `free` function. See the diagram below
 
 <figure>
   <img src="/images/a-little-about-use-after-free-bug/heap-diagram-free.png" 
-       alt="Two squares which show a name with 16 bytes and function with 8 bytes. The first square has grey scribble to indicate it is empty while the second square has text 0x401176 to indicate the function memory address"
+       alt="User's pointer still points to the heap box, but after free() the name field is now empty while the function field still holds the memory address 0x401176"
   >
   <figcaption>Figure 2. Heap Diagram After Releasing Memory. </figcaption>
 </figure>
@@ -246,7 +246,7 @@ struct here should be empty since we already called `free(user)`. See the diagra
 
 <figure>
   <img src="/images/a-little-about-use-after-free-bug/two-structs.png" 
-       alt="Two separate box with label 'User' and 'Attacker Payload' where each has connected 2 squares representing memory space for 'name' and 'function'"
+       alt="Both User and Attacker Payload structs point to the same heap box, whose name field is filled with 'A' bytes and function field holds 0x4011ab; User's arrow is marked as a dangling pointer while Attacker Payload's is a valid pointer"
   >
   <figcaption>Figure 3. Heap Diagram For Two Different Structs. </figcaption>
 </figure>
@@ -305,8 +305,8 @@ int main() {
 If we update the diagram, it is now looking like this,
 
 <figure>
-  <img src="/images/a-little-about-use-after-free-bug/two-structs.png" 
-       alt=""
+  <img src="/images/a-little-about-use-after-free-bug/mitigation.png" 
+       alt="User is set to NULL and no longer points to the heap; only Attacker Payload's valid pointer points to the heap box, whose name field is filled with 'A' bytes and function field holds 0x4011ab"
   >
   <figcaption>Figure 4. Mitigation. </figcaption>
 </figure>
