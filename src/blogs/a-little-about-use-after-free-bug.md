@@ -343,7 +343,7 @@ If we update the diagram, it is now looking like this,
   <figcaption>Figure 4. Mitigation. </figcaption>
 </figure>
 
-Only the `attacker_payload` is pointing to the heap address while `user` is no `NULL`. Let's try compile it,
+Only the `attacker_payload` is pointing to the heap address while `user` is now `NULL`. Let's try running it,
 
 ```c
 > python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
@@ -352,8 +352,8 @@ Target address: 0x4011ab
 Segmentation fault         (core dumped) python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
 ```
 
-The program now fails to print any text and instead ended with [segmentation fault](https://www.tutorialspoint.com/article/what-is-a-segmentation-fault-in-c-cplusplus)
-error. This happens because `user` struct is pointing to NULL address, which is an invalid memory address so
+The program now fails to print any text and instead ends with [segmentation fault](https://www.tutorialspoint.com/article/what-is-a-segmentation-fault-in-c-cplusplus)
+error. This happens because `user` pointer is pointing to NULL address, which is an invalid memory address so
 the operating system terminates the program.
 
 Of course we are not writing a program only to produce segmentation fault, we need to handle that but the focus
@@ -361,7 +361,12 @@ here is understanding Use-After-Free bug and how to mitigate it.
 
 ## That's A Wrap
 
-So that's how Use-After-Free bug could become a vulnerability. The tricky part here is guessing the function
-memory address. This can be known if the adversary has done a reconnaissance and found what libraries we
-use that is open and widely available. They can reproduce it in their machine then silently test it on our
-program.
+So that's how Use-After-Free bug becomes a vulnerability. We might wonder: "What if we don't print the function
+address? Isn't this much safer?" The short answer is no. The adversary can still do it without requiring us
+to print the function address. In the real world, this can be known if the adversary has done research on
+what open-source libraries we use, then reproduce the bug on their machine before silently testing their
+payload to our applications. The vulnerability lies in the dangling pointer. If we remember to set the pointer
+to `NULL` after releasing memory, the risk has been removed entirely.
+
+This is also why using languages with garbage-collection or no manual memory allocation are less risky. I'm not
+saying C is bad. It's just, despite its elegance and simplicity, there is a risk we need to be aware of.
