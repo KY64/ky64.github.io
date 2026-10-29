@@ -36,11 +36,10 @@ Let's focus on Heap since we will focus on what is needed to understand UAF bug.
 
 The diagram above shows two squares with label "Name" which has size 16 bytes and "Function" which has 8 bytes.
 Think of memory as a large warehouse. When we need space to store data, we reserve a specific section of
-that warehouse. Just like reserving a storage unit, we get an address so we can find our stuff later.
-This is similar to how memory management works. We have 16 GB memory and we are reserving or allocating
+that warehouse. This is similar to how memory management works. We have 16 GB memory and we are reserving or allocating
 16 bytes and 8 bytes for data labeled as "Name" and "Function". Since this data is stored in the Heap,
 this is called heap allocation. When reserving a memory space, we need to know where it is located, hence a
-heap contains not just values but also addresses. Just like a storage unit which has both contents and a unit
+heap contains not just values but also addresses. Just like a storage unit in the warehouse which has both contents and a unit
 number.
 
 Let's take example on how this looks like in C,
