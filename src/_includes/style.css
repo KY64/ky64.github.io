@@ -126,6 +126,26 @@ figcaption {
   line-height: 1.45;
 }
 
+/* Inline code borrows the code-block surface so it stops blending into prose.
+ * Reuses the same table tokens as `pre`, so both themes come for free; the
+ * border is softened with color-mix so code-dense paragraphs do not read as
+ * boxes, the small padding never inflates the prose line-height, and
+ * break-word keeps long tokens from stretching narrow screens. The selector
+ * also covers code wrapped in emphasis or a link, since a bolded code span
+ * renders as <p><strong><code> and the bare child combinator would miss it. */
+p > code,
+p :is(em, strong, a) > code {
+  background: var(--table-surface);
+  border: 1px solid
+    color-mix(in oklab, var(--table-border) 55%, var(--table-surface));
+  border-radius: 0.35em;
+  padding: 0.1em 0.35em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.88em;
+  overflow-wrap: break-word;
+}
+
 /* Code blocks get their own surface so they read as code rather than prose.
  * Reuses the table tokens so both containers look related, and both already
  * adapt to the light and dark schemes. */
