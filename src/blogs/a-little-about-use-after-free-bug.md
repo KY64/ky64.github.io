@@ -75,11 +75,11 @@ the old address. We will show an example later to better understand this concept
 
 ## Producing A Bug
 
-So we already get a part of the basic about memory. Let's start producing a bug so it is easier to understand
-how releasing memory works and why certain step is necessary.
+Now that we have learned the basic about memory, let's start producing a bug so it is easier to understand
+how releasing memory works, and why certain step is necessary.
 
-We are building a minimal safe POC where we are going to exploit Use-After-Free bug by calling a different
-function to print text. Let's do the first part,
+We are building a minimal POC to demonstrate Use-After-Free bug by calling a different function to print
+text. Let's do the first part,
 
 ```c
 void print_normal(char *name) {
@@ -111,11 +111,12 @@ int main() {
 }
 ```
 
-This part is to showcase the bug but not the exploit yet. We are assigning the name as "Alice" and use `print_normal` as a
-function to print text. Keep in mind that when we store a function here, we are actually storing the memory address of the
-function. Notice on the `free` function there, this function tells us that we are releasing memory reserved by `user` so
-it will have no value. However, remember that in a memory there are value and address. `free` function only release the memory
-which we have no value but the address remains. See the output when we compile it,
+This part showcases the Use-After-Free bug. We are assigning the name as "Alice" and use `print_normal` function
+to print text. Keep in mind that when we store a function here, we are actually storing its memory address.
+Notice the `free(user)` function there, this function releases the memory back to the system since we no longer
+need it. Hence the value 'Alice' disappears because the system reclaims that memory space, which may be
+overwritten with random characters. It could contain no value or random characters. Despite this, the pointer variable in our code
+is not updated. See the output when we compile it,
 
 ```
 > gcc useafterfree.c 
@@ -124,9 +125,9 @@ Function address: 0x401176
 Hello, ��
 ```
 
-Since we released the memory first before printing it, the name "Alice" is no longer stored but we can still call `print_name`
-which store memory address for `print_normal` function. This shows the memory address is not removed during
-releasing memory using `free` function. See the diagram below
+As we can see, we no longer see 'Alice' in the output yet somehow we can still call the function with
+`user->print_name`. This shows the pointer variable still referring to old memory address while the
+memory has been released back to the system. This condition is called *dangling pointer*. See the diagram below
 
 <figure>
   <img src="/images/a-little-about-use-after-free-bug/heap-diagram-free.png" 
@@ -138,7 +139,7 @@ releasing memory using `free` function. See the diagram below
 As someone who is not familiar with manual memory management, I found this seems ok and not critical enough. However, let's
 try to exploit this bug.
 
-## Exploit POC
+### Exploit POC
 
 We can introduce another struct to reserve another memory space.
 
@@ -149,9 +150,10 @@ read(0, attacker_payload, 24);
 
 ```
 
-What happens here, we are building another struct `attacker_payload` which reserves a memory, this is identical like `user` struct before. After
-that, we are going to retrieve an input which the result would be stored into the new struct. The expectation here, `user`
-struct and `attacker_payload` struct are using different memory space. The whole code becomes like this,
+We are building another struct `attacker_payload` which reserves memory, and the structure is identical to `user`
+struct before. After that, we retrieve an input and store the result to the new struct. The expectation
+here, `user` struct and `attacker_payload` struct are using different memory space. The whole code becomes
+like this,
 
 ```c
 #include <stdio.h>
@@ -190,8 +192,8 @@ int main() {
 }
 ```
 
-We are printing the memory address for `print_hacked` function here since we are going to show how we can call the function
-without explicitly update the code.
+We print the memory address for `print_hacked` function to show later on how we can call the function without
+explicitly updating the code.
 
 ```c
 > gcc useafterfree.c 
@@ -208,15 +210,39 @@ call `print_hacked` we need to know the memory size required by the struct. From
 16 bytes are 'name' so we input 16 characters. However, the next 8 bytes is a memory address. So what we need to do to
 execute a function here is, our first input will be 16 characters, then the next 8 bytes will be our target address.
 
-Since our target address is 0x4011ab, we can use a python script to convert it to buffer since in terminal, all inputs are
-converted into ASCII so it becomes a string instead of a buffer. Here is the script
+Since our target address is 0x4011ab, we need to include this as the input. However, since C is a low-level language,
+it talks directly to the machine so let's get to know about how our machine handle bytes. Back to our analogy
+about memory as large warehouse, we already reserved a space as storage we call it storage unit. Let's say
+we want to line up packages in a storage unit, how do we start? Should we start from the left-most area or
+the right-most area? Either way works. This also applies in memory. When storing a value, it converted into
+bytes but it needs to be stored in order. Ordering of bytes is called *[endianness](https://courses.cs.washington.edu/courses/cse351/24su/lectures/02/CSE351-02-memoryI_24su_ink.pdf)*.
+There are *big-endian* which starts from most-significant byte, and *little-endian* which starts from
+least-significant byte.
+
+For our case, we are compiling and executing the code on x86-64 CPU which [uses](https://www.cs.ucr.edu/~csong/cs153/refs/amd64-vol4-media.pdf)
+little-endian. So the ordering goes like this
+
+```
+[40] -> most-significant byte
+[11]
+[ab] -> least-significant byte
+
+
+Big-Endian: 40 11 ab
+Little-Endian: ab 11 40
+```
+
+Now we know what to input, the question is how? If we put it on terminal, it won't work because it is converting
+our input into ASCII string yet pointer address is not a string. So we are going to use a script to input this
+as bytes by using Python script, here is the script:
 
 ```sh
 python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
 ```
 
-Notice we revert the order from `0x4011ab` to `\xab\x11\x40\x00\x00\x00\x00\x00` because we are filling the last 8 bytes
-and my AMD CPU [is](https://www.cs.ucr.edu/~csong/cs153/refs/amd64-vol4-media.pdf) little endian. Let's test this,
+First we reverse the order from `0x4011ab` to `\xab\x11\x40`. This is how Python respresents `ab 11 40` bytes.
+Second, since the heap size for pointer is 8 bytes, we pad the rest 5 bytes with zero. So the final result is
+`\xab\x11\x40\x00\x00\x00\x00\x00`
 
 ```
 > python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
@@ -257,7 +283,7 @@ struct here should be empty since we already called `free(user)`. See the diagra
   <figcaption>Figure 3. Heap Diagram For Two Different Structs. </figcaption>
 </figure>
 
-This hapens because the `user` struct still points to the same heap address which currently used by `attacker_payload`. So how
+This happens because the `user` struct still points to the same heap address which currently used by `attacker_payload`. So how
 to solve this issue?
 
 ## Mitigation
