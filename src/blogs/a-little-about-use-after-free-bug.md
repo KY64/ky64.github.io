@@ -3,7 +3,7 @@ layout: 'blog.njk'
 title: A Little About Use-After-Free Bug
 description: Understanding how Use-After-Free bug could cause a vulnerability by looking at a small Proof-of-Concept in C
 tags: blog
-date: 2026-10-27
+date: 2026-10-29
 ---
 
 # A Little About Use-After-Free Bug
@@ -13,9 +13,9 @@ vulnerability. Since I wasn't familiar with C or manual memory management. I loo
 could happen in C.
 
 *Use-After-Free* or UAF is a bug specifically occurs on manual memory management programming language, like C and C++.
-Why this is specific because plainly speaking, it happens when we allocate a memory address, use it to add value, then
-label it as 'free' but forgot to empty the memory before reusing it. If this sounds confusing, let's start from the basic
-on understanding how memory plays role in executing any program.
+Why this is specific because plainly speaking, it happens when we allocate a memory space, use it to add value, then
+empty the memory but forgot to remove the pointer which still points to the memory address. If this sounds confusing, let's
+start from the basic on understanding how memory plays role in executing any program.
 
 ## Memory Basic
 
@@ -130,9 +130,11 @@ releasing memory using `free` function. See the diagram below
 </figure>
 
 As someone who is not familiar with manual memory management, I found this seems ok and not critical enough. However, let's
-try to exploit this bug. We introduce another struct to reserve another memory space.
+try to exploit this bug.
 
 ## Exploit POC
+
+We can introduce another struct to reserve another memory space.
 
 ```c
 struct User *attacker_payload = malloc(sizeof(struct User));
@@ -142,8 +144,8 @@ read(0, attacker_payload, 24);
 ```
 
 What happens here, we are building another struct `attacker_payload` which reserves a memory, this is identical like `user` struct before. After
-that, we are going to retrieve an input which the result would be stored into the new struct. The expectation here,
-`user` struct and `attacker_payload` struct are using different memory space. The whole code becomes like this,
+that, we are going to retrieve an input which the result would be stored into the new struct. The expectation here, `user`
+struct and `attacker_payload` struct are using different memory space. The whole code becomes like this,
 
 ```c
 #include <stdio.h>
@@ -186,8 +188,8 @@ We are printing the memory address for `print_hacked` function here since we are
 without explicitly update the code.
 
 ```c
-temp> gcc useafterfree.c 
-temp> ./a.out 
+> gcc useafterfree.c 
+> ./a.out 
 Function address: 0x401176
 Target address: 0x4011ab
 a
@@ -211,7 +213,7 @@ Notice we revert the order from `0x4011ab` to `\xab\x11\x40\x00\x00\x00\x00\x00`
 and my AMD CPU [is](https://www.cs.ucr.edu/~csong/cs153/refs/amd64-vol4-media.pdf) little endian. Let's test this,
 
 ```
-temp> python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
+> python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
 Function address: 0x401186
 Target address: 0x4011ab
 SYSTEM COMPROMISED: AAAAAAAAAAAAAAAA�@
@@ -239,6 +241,95 @@ although we introduce a new struct `attacker_payload`, we are not using the stru
 }
 ```
 
-See? We even use `user->print_name(user->name);` which already assigned with `print_normal` before. Even the `name` for `user`
-struct here should be empty or printing some random character since we already called `free(user)`. This shows that we can
-actually alter the code flow without changing the codebase but just through an input.
+See? We even use `user->print_name(user->name);` which already assigned with `print_normal` before. Even the `name` in `user`
+struct here should be empty since we already called `free(user)`. See the diagram below,
+
+<figure>
+  <img src="/images/a-little-about-use-after-free-bug/two-structs.png" 
+       alt="Two separate box with label 'User' and 'Attacker Payload' where each has connected 2 squares representing memory space for 'name' and 'function'"
+  >
+  <figcaption>Figure 3. Heap Diagram For Two Different Structs. </figcaption>
+</figure>
+
+This hapens because the `user` struct still points to the same heap address which currently used by `attacker_payload`. So how
+to solve this issue?
+
+## Mitigation
+
+So the simplest way to mitigate this is [mentioned](http://cwe.mitre.org/data/definitions/416.html) in the CWE site, which is
+by assigning `NULL` to `user`.
+
+```c
+user = NULL;
+```
+
+What this means is, since after releasing the memory with `free(user)`, the pointer is still pointing to that memory so by
+assigning `NULL` we are saying, "there's nothing there, stop referring to that". The whole implementation looks like this,
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+struct User {
+    char name[16];
+    void (*print_name)(char *);
+};
+
+void print_normal(char *name) {
+    printf("Hello, %s\n", name);
+}
+
+void print_hacked(char *name) {
+    printf("SYSTEM COMPROMISED: %s\n", name);
+}
+
+int main() {
+    struct User *user = malloc(sizeof(struct User));
+    strcpy(user->name, "Alice");
+    user->print_name = print_normal;
+
+    printf("Function address: %p\n", print_normal);
+    printf("Target address: %p\n", print_hacked);
+    free(user);
+    user = NULL; // Remove dangling pointer
+    struct User *attacker_payload = malloc(sizeof(struct User));
+    read(0, attacker_payload, 24);
+    user->print_name(user->name); // User-After-Free
+    return 0;
+}
+
+```
+
+If we update the diagram, it is now looking like this,
+
+<figure>
+  <img src="/images/a-little-about-use-after-free-bug/two-structs.png" 
+       alt=""
+  >
+  <figcaption>Figure 4. Mitigation. </figcaption>
+</figure>
+
+Only the `attacker_payload` is pointing to the heap address while `user` is no `NULL`. Let's try compile it,
+
+```c
+> python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
+Function address: 0x401186
+Target address: 0x4011ab
+Segmentation fault         (core dumped) python3 -c "import sys; sys.stdout.buffer.write(b'A'*16 + b'\xab\x11\x40\x00\x00\x00\x00\x00')" | ./a.out
+```
+
+The program now fails to print any text and instead ended with [segmentation fault](https://www.tutorialspoint.com/article/what-is-a-segmentation-fault-in-c-cplusplus)
+error. This happens because `user` struct is pointing to NULL address, which is an invalid memory address so
+the operating system terminates the program.
+
+Of course we are not writing a program only to produce segmentation fault, we need to handle that but the focus
+here is understanding Use-After-Free bug and how to mitigate it.
+
+## That's A Wrap
+
+So that's how Use-After-Free bug could become a vulnerability. The tricky part here is guessing the function
+memory address. This can be known if the adversary has done a reconnaissance and found what libraries we
+use that is open and widely available. They can reproduce it in their machine then silently test it on our
+program.
