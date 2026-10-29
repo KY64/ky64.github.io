@@ -8,20 +8,22 @@ date: 2026-10-29
 
 # A Little About Use-After-Free Bug
 
-Quite often, *Use-After-Free* term appear in CVE report. I kept wondering what does that mean and how it could become a
-vulnerability. Since I wasn't familiar with C or manual memory management. I looked into it and understand how it
-could happen in C.
+Quite often, I kept seeing *Use-After-Free* mentioned in CVE reports. I kept wondering what that meant and
+how it could become a vulnerability. Since I wasn't familiar with C or manual memory management, I looked
+into it to understand how it happens.
 
-*Use-After-Free* or UAF is a bug specifically occurs on manual memory management programming language, like C and C++.
-Why this is specific because plainly speaking, it happens when we allocate a memory space, use it to add value, then
-empty the memory but forgot to remove the pointer which still points to the memory address. If this sounds confusing, let's
-start from the basic on understanding how memory plays role in executing any program.
+*Use-After-Free* or UAF is a bug that specifically occurs in programming languages with manual memory management,
+like C and C++. Why though? Plainly speaking, it happens when we allocate a memory space, use it to add value,
+then release the memory back to the system, but forget to remove the pointer that still points to that original
+memory address. If this sounds confusing, let's start from the basics on understanding how memory plays a
+role in executing any program.
 
 ## Memory Basic
 
-A program needs memory to store data, like assigning a value to be read by other function. In memory, there are two kind of
-area: Heap and Stack. When we call a function, Stack is storing the instruction to be executed while Heap is storing the data
-independently of the function. A more detailed explanation on this can be read [here](https://www.geeksforgeeks.org/dsa/stack-vs-heap-memory-allocation/).
+A program needs memory to store data, like assigning a value to be read by other function. In memory, there
+are two kinds of area: Heap and Stack. When we call a function, Stack is storing the instruction to be executed
+while Heap is storing the data independently of the function. A more detailed explanation on this can be
+read [here](https://www.geeksforgeeks.org/dsa/stack-vs-heap-memory-allocation/).
 
 Let's focus on Heap since we will focus on what is needed to understand UAF bug. See the following picture
 
@@ -32,14 +34,14 @@ Let's focus on Heap since we will focus on what is needed to understand UAF bug.
   <figcaption>Figure 1. Heap Diagram. </figcaption>
 </figure>
 
-The diagram above shows two squares with label "Name" which has size 16 bytes and "Function" which has 8 bytes. Think of
-memory is like a large land, we have no plan what to do with the land yet. Hence we start planning by reserving some space of
-the land to be used for specific purpose. Let's say we have a ten square kilometers land area and we want to reserve 16 square
-meters and 8 square meters for specific purpose. This is similar to how memory management works. We have 16 GB memory and we
-are reserving or allocating 16 bytes and 8 bytes for data labeled as "Name" and "Function". Since these datas are stored in the
-Heap, this is called heap allocation. When reserving a memory space, we need to know where it is located, hence a heap contains 
-not just values but also addresses. Just like when we reserve part of a land we need the address to make it easier to locate
-it.
+The diagram above shows two squares with label "Name" which has size 16 bytes and "Function" which has 8 bytes.
+Think of memory as a large warehouse. When we need space to store data, we reserve a specific section of
+that warehouse. Just like reserving a storage unit, we get an address so we can find our stuff later.
+This is similar to how memory management works. We have 16 GB memory and we are reserving or allocating
+16 bytes and 8 bytes for data labeled as "Name" and "Function". Since this data is stored in the Heap,
+this is called heap allocation. When reserving a memory space, we need to know where it is located, hence a
+heap contains not just values but also addresses. Just like a storage unit which has both contents and a unit
+number.
 
 Let's take example on how this looks like in C,
 
@@ -57,24 +59,27 @@ int main() {
 }
 ```
 
-The snippet above implements diagram from Figure 1. The function here is `print_name` where we will store the pointer or the
-address of the function in the heap. The `malloc` function is used to reserve memory for `User` struct which contain
-data for `name` and `print_name`. This step is necessary since we are using manual memory management programming language.
+The snippet above implements diagram from Figure 1. The function here is `print_name` where we will store
+the pointer or the address of the function in the heap. A pointer is just a variable that stores the
+memory address of another variable. The `malloc` function is used to reserve memory for `User` struct
+which contain data for `name` and `print_name`. This step is necessary since we are using manual memory
+management programming language.
 
 ### Memory Address
 
-A value that is stored in a memory has an address. Which is called memory address. The address here is unlike a normal resident
-address but a hexadecimal value which already explained [here](https://www.geeksforgeeks.org/dsa/stack-vs-heap-memory-allocation/).
-We need to know about this because Use-After-Free bug will make more sense when we release a memory but forget to clean the
-address. We will show more example later to better understand memory cleanup.
+Unlike a normal home address, a memory address is written as a hexadecimal value. We can
+read more about it [here](https://www.geeksforgeeks.org/dsa/stack-vs-heap-memory-allocation/).
+This address is usually stored in a pointer. We need to know about this because Use-After-Free
+bug will make more sense when we release memory but forget to update the pointer which still stores
+the old address. We will show an example later to better understand this concept.
 
 ## Producing A Bug
 
-So we already get a part of the basic about memory. Let's start producing a bug so it is easier to understand how releasing
-memory works and why certain step is necessary.
+So we already get a part of the basic about memory. Let's start producing a bug so it is easier to understand
+how releasing memory works and why certain step is necessary.
 
-We are building a minimal safe POC where we are going to exploit Use-After-Free bug by calling a different function to
-print text. Let's do the first part,
+We are building a minimal safe POC where we are going to exploit Use-After-Free bug by calling a different
+function to print text. Let's do the first part,
 
 ```c
 void print_normal(char *name) {
@@ -87,7 +92,8 @@ void print_hacked(char *name) {
 ```
 
 We have 2 functions that we are going to use, the first one is what we use in the code, the second one will not be used in
-the code. Instead, we are going to get the second function address and shows how to call the function using Use-After-Free bug.
+the code. Instead, we are going to get the second function address and show how to call the function by utilizing
+Use-After-Free bug.
 
 Let's continue the next part,
 
@@ -100,7 +106,7 @@ int main() {
     printf("Function address: %p\n", print_normal); // Print memory address of print_normal function
     free(user); // BUG: We only release the memory but the memory map address remains.
 
-    user->print_name(user->name); // User-After-Free
+    user->print_name(user->name); // Use-After-Free
     return 0;
 }
 ```
@@ -179,7 +185,7 @@ int main() {
     // REAL WORLD: Read 24 raw bytes directly from the user's input (stdin)
     read(0, attacker_payload, 24);
 
-    user->print_name(user->name); // User-After-Free, we are using `user` struct instead of `attacker_payload`
+    user->print_name(user->name); // Use-After-Free, we are using `user` struct instead of `attacker_payload`
     return 0;
 }
 ```
@@ -236,7 +242,7 @@ although we introduce a new struct `attacker_payload`, we are not using the stru
     // REAL WORLD: Read 24 raw bytes directly from the user's input (stdin)
     read(0, attacker_payload, 24);
 
-    user->print_name(user->name); // User-After-Free, we are using `user` struct instead of `attacker_payload`
+    user->print_name(user->name); // Use-After-Free, we are using `user` struct instead of `attacker_payload`
     return 0;
 }
 ```
@@ -296,7 +302,7 @@ int main() {
     user = NULL; // Remove dangling pointer
     struct User *attacker_payload = malloc(sizeof(struct User));
     read(0, attacker_payload, 24);
-    user->print_name(user->name); // User-After-Free
+    user->print_name(user->name); // Use-After-Free
     return 0;
 }
 
