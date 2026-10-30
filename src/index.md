@@ -25,3 +25,4 @@ kind of collaboration rather than treated as a one-off instruction.
 - GitHub: [https://github.com/KY64](https://github.com/KY64)
 - Codeberg: [https://codeberg.org/ky64](https://codeberg.org/ky64)
 - LinkedIn: [https://www.linkedin.com/in/excel-d-515b391a5/](https://www.linkedin.com/in/excel-d-515b391a5/)
+- Tumblr: [@kimiyukiyukawa](https://www.tumblr.com/kimiyukiyukawa)
