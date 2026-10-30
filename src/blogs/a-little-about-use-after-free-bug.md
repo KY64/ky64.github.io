@@ -114,8 +114,8 @@ This part showcases the Use-After-Free bug. We are assigning the name as "Alice"
 to print text. Keep in mind that when we store a function here, we are actually storing its memory address.
 Notice the `free(user)` function there, this function releases the memory back to the system since we no longer
 need it. Hence the value 'Alice' disappears because the system reclaims that memory space, which may be
-overwritten with random characters. It could contain no value or random characters. Despite this, the pointer variable in our code
-is not updated. See the output when we compile it,
+overwritten with random characters. Despite this, the pointer variable in our code
+is not updated. See the output when we run it,
 
 ```
 > gcc useafterfree.c 
