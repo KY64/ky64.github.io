@@ -188,7 +188,14 @@ const url = req.originalUrl || req.url || req.path;
 if (url.includes('/dashboard') || url.includes('/socket.io')) return next();
 ```
 
-Since `req.originalUrl` is retaining the original URL, the path `/nodered/flows?x=/socket.io` will be stored exactly the
-same in `req.originalUrl`. When this match, the code skip the authentication part on the next line and proceed to process the
-request. So it shouldn't include the query parameter at all but only the path, hence on [PR #2660](https://github.com/frangoteam/FUXA/pull/2260/files)
-it replaces it with `req.baseUrl`.
+Since `req.originalUrl` is retaining the original URL, the path that was assume to be `/dashboard` and `/socket.io` as valid was
+actually consider `/nodered/flows?x=/socket.io` to be valid also. When this match, the code skip the authentication part on
+the next line and proceed to process the request. The solution is it shouldn't include the query parameter at all but only the
+path, hence on [PR #2660](https://github.com/frangoteam/FUXA/pull/2260/files) it replaces it with `req.baseUrl`.
+
+I wonder, how come this vulnerability exists? what was the change that introduced this? It turned out, if we look again at [PR #2182](https://github.com/frangoteam/FUXA/pull/2182)
+and check the vulnerability report, that PR was created to patch another vulnerability, [CVE-2026-25938](https://www.cve.org/CVERecord?id=CVE-2026-25938).
+The vulnerabity report is about unauthenticated `/nodered/*` endpoint which it protects `/nodered` endpoint but skip authentication
+several endpoints including `/nodered/flows`.
+
+### When Convenience Beats Security
