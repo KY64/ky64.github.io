@@ -126,6 +126,41 @@ figcaption {
   line-height: 1.45;
 }
 
+/* Click-to-enlarge images (the Popover API; no JS). The image rule in
+ * eleventy.config.js emits the trigger and this hidden overlay copy.
+ * display:none until :popover-open also degrades old browsers to plain
+ * non-zoomable images. The dvh line overrides vh where supported so mobile
+ * browser chrome cannot push the image off screen. The backdrop is black in
+ * both color schemes on purpose: a veil that lightened in dark mode would
+ * let the page glow through the enlarged image. */
+button.lightbox {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+img[popover] {
+  display: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  max-width: 92vw;
+  max-height: 92vh;
+  max-height: 92dvh;
+  object-fit: contain;
+}
+
+img[popover]:popover-open {
+  display: block;
+}
+
+img[popover]::backdrop {
+  background: rgb(0 0 0 / 0.75);
+}
+
 /* Inline code borrows the code-block surface so it stops blending into prose.
  * Reuses the same table tokens as `pre`, so both themes come for free; the
  * border is softened with color-mix so code-dense paragraphs do not read as

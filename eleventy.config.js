@@ -94,5 +94,60 @@ export default function (eleventyConfig) {
     return defaultFence(tokens, idx, options, env, self).replace("<pre>", '<pre tabindex="0">');
   };
 
+  // Content images get click-to-enlarge without any JS: the trigger wraps
+  // the inline image and a hidden overlay copy is appended, shown through
+  // the native Popover API. A Markdown image title turns the pair into a
+  // figure with a visible caption, so posts stay plain Markdown:
+  //   ![alt](/images/post/a.png)              -> lightbox image
+  //   ![alt](/images/post/a.png "Figure 1.")  -> lightbox image + figcaption
+  // Images outside /images/ (badges, avatars) and images already inside a
+  // link are passed through untouched. The overlay has an empty alt so
+  // screen readers do not announce the same image twice.
+  const defaultImage = md.renderer.rules.image || function (tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options, env, self);
+  };
+
+  md.renderer.rules.image = function (tokens, idx, options, env, self) {
+    const token = tokens[idx];
+    const src = token.attrGet("src") || "";
+    if (!src.startsWith("/images/")) {
+      return defaultImage(tokens, idx, options, env, self);
+    }
+
+    // A linked image ([![alt](img)](url)) keeps its link: the trigger would
+    // become interactive content nested inside an anchor, so bail out while
+    // an unclosed link_open is seen.
+    let linkDepth = 0;
+    for (let i = 0; i < idx; i++) {
+      if (tokens[i].type === "link_open") linkDepth++;
+      else if (tokens[i].type === "link_close") linkDepth--;
+    }
+    if (linkDepth > 0) {
+      return defaultImage(tokens, idx, options, env, self);
+    }
+
+    const alt = token.content || "";
+    const caption = (token.attrGet("title") || "").trim();
+
+    // Same image twice in one post gets a numbered id so both stay unique.
+    env.lightboxSeq = env.lightboxSeq || new Map();
+    const baseId = "lb-" + slug(src);
+    const seen = (env.lightboxSeq.get(baseId) || 0) + 1;
+    env.lightboxSeq.set(baseId, seen);
+    const id = seen === 1 ? baseId : `${baseId}-${seen}`;
+
+    // The trigger is a <button>, not an <a>: the popovertarget attribute is
+    // only live on button/input elements in the supported baseline; on an
+    // anchor it is inert and clicking would do nothing.
+    const trigger =
+      `<button class="lightbox" type="button" popovertarget="${id}">` +
+      `<img src="${md.utils.escapeHtml(src)}" alt="${md.utils.escapeHtml(alt)}">` +
+      `</button>`;
+    const overlay = `<img popover id="${id}" src="${md.utils.escapeHtml(src)}" alt="">`;
+
+    if (!caption) return `${trigger}${overlay}`;
+    return `<figure>${trigger}${overlay}<figcaption>${md.utils.escapeHtml(caption)}</figcaption></figure>`;
+  };
+
   eleventyConfig.setLibrary("md", md);
 }
