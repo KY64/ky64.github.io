@@ -195,7 +195,13 @@ path, hence on [PR #2660](https://github.com/frangoteam/FUXA/pull/2260/files) it
 
 I wonder, how come this vulnerability exists? what was the change that introduced this? It turned out, if we look again at [PR #2182](https://github.com/frangoteam/FUXA/pull/2182)
 and check the vulnerability report, that PR was created to patch another vulnerability, [CVE-2026-25938](https://www.cve.org/CVERecord?id=CVE-2026-25938).
-The vulnerabity report is about unauthenticated `/nodered/*` endpoint which it protects `/nodered` endpoint but skip authentication
+The vulnerabity report is about unauthenticated `/nodered/*` endpoint which it protects `/nodered` endpoint but skip authentication for
 several endpoints including `/nodered/flows`.
 
 ### When Convenience Beats Security
+
+FUXA introduced Node-RED connector since release [v1.2.8](https://github.com/frangoteam/FUXA/releases/tag/v1.2.8). It was introduced
+in [PR #1993](https://github.com/frangoteam/FUXA/pull/1993). This was already including authentication on `/nodered` endpoint.
+However, since [PR #2072](https://github.com/frangoteam/FUXA/pull/2072) this authentication was modified to exclude several
+endpoints, including `/nodered/flows`. Why? "*It fixes various bugs related to Node-Red embedding, auth, paths, fuxa-nodes,
+and API access.*" that was stated in the summary.
