@@ -27,12 +27,7 @@ read [here](https://www.geeksforgeeks.org/dsa/stack-vs-heap-memory-allocation/).
 
 Let's focus on Heap since we will focus on what is needed to understand UAF bug. See the following picture
 
-<figure>
-  <img src="/images/a-little-about-use-after-free-bug/heap-diagram.png" 
-       alt="Two squares which show a name with 16 bytes and function with 8 bytes"
-  >
-  <figcaption>Figure 1. Heap Diagram. </figcaption>
-</figure>
+![Two squares which show a name with 16 bytes and function with 8 bytes](/images/a-little-about-use-after-free-bug/heap-diagram.png "Figure 1. Heap Diagram.")
 
 The diagram above shows two squares with label "Name" which has size 16 bytes and "Function" which has 8 bytes.
 Think of memory as a large warehouse. When we need space to store data, we reserve a specific section of
@@ -128,12 +123,7 @@ As we can see, we no longer see 'Alice' in the output yet somehow we can still c
 `user->print_name`. This shows the pointer variable still referring to old memory address while the
 memory has been released back to the system. This condition is called *dangling pointer*. See the diagram below
 
-<figure>
-  <img src="/images/a-little-about-use-after-free-bug/heap-diagram-free.png" 
-       alt="User's pointer still points to the heap box, but after free() the name field is now empty while the function field still holds the memory address 0x401176"
-  >
-  <figcaption>Figure 2. Heap Diagram After Releasing Memory. </figcaption>
-</figure>
+![User's pointer still points to the heap box, but after free() the name field is now empty while the function field still holds the memory address 0x401176](/images/a-little-about-use-after-free-bug/heap-diagram-free.png "Figure 2. Heap Diagram After Releasing Memory.")
 
 As someone who is not familiar with manual memory management, I found this seems ok and not critical enough. However, let's
 try to exploit this bug.
@@ -275,12 +265,7 @@ although we introduce a new struct `attacker_payload`, we are not using the stru
 See? We even use `user->print_name(user->name);` which already assigned with `print_normal` before. Even the `name` in `user`
 struct here should be empty since we already called `free(user)`. See the diagram below,
 
-<figure>
-  <img src="/images/a-little-about-use-after-free-bug/two-structs.png" 
-       alt="Both User and Attacker Payload structs point to the same heap box, whose name field is filled with 'A' bytes and function field holds 0x4011ab; User's arrow is marked as a dangling pointer while Attacker Payload's is a valid pointer"
-  >
-  <figcaption>Figure 3. Heap Diagram For Two Different Structs. </figcaption>
-</figure>
+![Both User and Attacker Payload structs point to the same heap box, whose name field is filled with 'A' bytes and function field holds 0x4011ab; User's arrow is marked as a dangling pointer while Attacker Payload's is a valid pointer](/images/a-little-about-use-after-free-bug/two-structs.png "Figure 3. Heap Diagram For Two Different Structs.")
 
 This happens because the `user` struct still points to the same heap address which currently used by `attacker_payload`. So how
 to solve this issue?
@@ -335,12 +320,7 @@ int main() {
 
 If we update the diagram, it is now looking like this,
 
-<figure>
-  <img src="/images/a-little-about-use-after-free-bug/mitigation.png" 
-       alt="User is set to NULL and no longer points to the heap; only Attacker Payload's valid pointer points to the heap box, whose name field is filled with 'A' bytes and function field holds 0x4011ab"
-  >
-  <figcaption>Figure 4. Mitigation. </figcaption>
-</figure>
+![User is set to NULL and no longer points to the heap; only Attacker Payload's valid pointer points to the heap box, whose name field is filled with 'A' bytes and function field holds 0x4011ab](/images/a-little-about-use-after-free-bug/mitigation.png "Figure 4. Mitigation.")
 
 Only the `attacker_payload` is pointing to the heap address while `user` is now `NULL`. Let's try running it,
 

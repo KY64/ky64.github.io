@@ -281,10 +281,7 @@ Then our embedding vector table would look like this,
 Now we have the initial embedding vectors. The following figure visualizes their positions in the
 geometric space.
 
-<figure>
-  <img src="/images/basic-word-embedding-in-language-model/initial-embedding-vector.png" alt="3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which are scattered in different directions before training.">
-  <figcaption>Figure 1. Initial positions of the word vectors before training. </figcaption>
-</figure>
+![3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which are scattered in different directions before training.](/images/basic-word-embedding-in-language-model/initial-embedding-vector.png "Figure 1. Initial positions of the word vectors before training.")
 
 We have our data ready for training, the next step is designing how the training should be
 done. Since we have converted all input into number, the training steps will involve quite a bit of mathematics.
@@ -300,10 +297,7 @@ since we have converted all input into a vector, how can the model guess if two 
 With vector, determining its "similarity" is by finding how _aligned_ two vectors are. The alignment can be
 measured through length and direction of the vector. Take a look at image below.
 
-<figure>
-  <img src="/images/basic-word-embedding-in-language-model/initial-sun-vector.png" alt="3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is smaller than the angle between sun and rise.">
-  <figcaption>Figure 2. Sun aligns more with wave than rise.</figcaption>
-</figure>
+![3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is smaller than the angle between sun and rise.](/images/basic-word-embedding-in-language-model/initial-sun-vector.png "Figure 2. Sun aligns more with wave than rise.")
 
 The vectors have different lengths and point in different directions. We can measure the direction of a vector
 from its angle, the value of θ. So how do we tell if two vectors are aligned or not? We need to measure its
@@ -511,20 +505,14 @@ After many epochs, related word vectors gradually become more aligned, allowing 
 relationships between words more accurately based on the training dataset. This is how embedding vectors
 for "Sun", "Rise", and "Wave" look like now after training:
 
-<figure>
-  <img src="/images/basic-word-embedding-in-language-model/trained-sun-vector.png" alt="3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is larger than the angle between sun and rise.">
-  <figcaption>Figure 3. Sun aligns more with rise than wave.</figcaption>
-</figure>
+![3D diagram with sun, wave, and rise vectors starting at the origin. The angle between sun and wave is larger than the angle between sun and rise.](/images/basic-word-embedding-in-language-model/trained-sun-vector.png "Figure 3. Sun aligns more with rise than wave.")
 
 When comparing with Figure 2, we notice that "Sun" is now more aligned with "Rise" than with "Wave". This shows
 the model is able to predict the relationships between words better. Figure 3 only shows one example
 involving "Sun". If we look at all of the word vectors after training, we can see the same pattern across
 the entire vocabulary in the following figure.
 
-<figure>
-  <img src="/images/basic-word-embedding-in-language-model/trained-embedding-vector.png" alt="3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which has more aligned directions after training.">
-  <figcaption>Figure 4. Token embeddings after training.</figcaption>
-</figure>
+![3D plot of twelve initial token embedding vectors. Arrows start at the origin and point to labelled token coordinates, which has more aligned directions after training.](/images/basic-word-embedding-in-language-model/trained-embedding-vector.png "Figure 4. Token embeddings after training.")
 
 Notice that "Sun", "Rise", and "Glow" now point in similar directions. "Ocean" also points in a roughly similar
 direction, although not as closely aligned. This is expected because the word "Ocean" appears
