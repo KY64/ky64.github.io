@@ -205,3 +205,35 @@ in [PR #1993](https://github.com/frangoteam/FUXA/pull/1993). This was already in
 However, since [PR #2072](https://github.com/frangoteam/FUXA/pull/2072) this authentication was modified to exclude several
 endpoints, including `/nodered/flows`. Why? "*It fixes various bugs related to Node-Red embedding, auth, paths, fuxa-nodes,
 and API access.*" that was stated in the summary.
+
+Seems the authentication was thought to be a blocker so it was disabled for convenience, yet later it was considered as vulnerability (of course!)
+and added in CVE report. Solving a bug by removing authentication is a bug. We can reproduce the vulnerability using the same step like we did on
+path manipulation. Except this time we can omit `?x=/socket.io`. Just sending the payload to `/nodered/flows` and make it executes
+arbitrary code.
+
+### A Guest Coming From Backdoor
+
+After we learn how the vulnerability exists in the first place, what happen after those 2 CVEs we discussed already patched?
+Another CVE report coming, [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443). This time it's not about the
+endpoint but the credential itself, especially how it was validated by the server.
+
+Accessing protected endpoint requires a [JWT](https://www.jwt.io/introduction#what-is-json-web-token), this token can be passed
+on `x-access-token` header or `?token=` query parameter. The payload looks like [this](https://github.com/frangoteam/FUXA/blob/5066a1a8117849c5e376cf640cd8b040cd9c9466/server/api/jwt-helper.js#L105-L116)
+
+```json
+{
+    "id": "user_id", //can be any user ID
+    "groups": [] //[-1] for admin, and ["guest"] for guest
+}
+```
+
+Let's focus on `groups`, FUXA has admin group which has value -1 or 255, and guest group that has value 'guest'.
+Guest is basically read-only mode, getting a 'guest' token is done by simply sending POST request to `/api/heartbeat`.
+So anyone can get it. While admin group has full access, including `/nodered/*` endpoint. It requires a login to get it.
+Both groups are signed using the same secret code. The question is, does the server know which group is accessing `/nodered/*`
+endpoint?
+
+When PR #2660 was merged to protect `/nodered/*` endpoint, it reused function to verify the JWT signature as a way to check
+whether a request is allowed or not. However, since both admin and guest JWT were signed using the same secret code, both had
+the same valid signature. In other words, any valid JWT can be used to access `/nodered/*` endpoint regardless the groups. This
+is what [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443) is all about.
