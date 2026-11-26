@@ -386,4 +386,33 @@ since I don't connect to any devices. We can do many things with this vulnerabil
 why adding proper protection is necessary to this endpoint.
 
 This vulnerability is patched on [PR #2393](https://github.com/frangoteam/FUXA/pull/2393), it added validation by decoding
-the JWT and check if the group payload is 'guest' or 'admin'. It will return HTTP 403 if the group is 'guest'.
+the JWT and check if the group payload is 'guest' or 'admin'. It will return HTTP 403 if the group is 'guest'. This sounds a bit
+odd since any group other than guest can access this endpoint. Apparently after sometime, another [commit](https://github.com/frangoteam/FUXA/commit/315ef2300b1a5c956251508f6953e9e2e1a98831)
+improved it by checking if the group is `admin` and return HTTP 403 if not. Figure below is the new refined authentication flow
+
+![](/images/analyzing-scada-software-cve/fuxa-refined-authentication-flow.png "Figure 4. Improved FUXA Node-RED Endpoint Authentication Flow")
+
+This should be enough to protect the Node-RED endpoint.
+
+## Lessons
+
+After reading all 3 CVEs, I wonder if these CVEs can be prevented from
+the begininng since the time it was discovered was quite long. This is the chronological order of the CVE:
+
+- [CVE-2026-25938](https://www.cve.org/CVERecord?id=CVE-2026-25938) (February 9 2026)
+- [CVE-2026-43945](https://www.cve.org/CVERecord?id=CVE-2026-43945) (July 21 2026)
+- [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443) (August 18 2026)
+
+From release v1.2.8, I'm wondering if the problem here was because of time, since there was a PR that disabled authentication as
+a way to fix a bug and the maintainer just accepted it. It could be because the maintainer was not using Node-RED so he trusted
+the contributor judgement. The partial fix in a PR also showed a lack of systemic review and familiarity with the whole
+system, at least the authentication flow.
+
+What if, all of this problem can be solved with a tool that could understand the project and the codebase, then points out the
+potential problem in pull request? I believe in 2026 that tool already exists and capable enough. My last team was using
+coding agent to review every PR and it could catch subtle bug and logical error. That saved us a lot of time instead of waiting
+for other teammate, who may be exhausted, to give feedback and approve.
+
+The bigger challenge here is maintaining connector since the maintainer needs to be familiar and ensure the connector implementation
+is secure enough or they can delegate a person who is familiar with the domain to maintain the connector. Otherwise it could end up
+like the CVE we read, exposing a sensitive endpoint to public and cause a security concern.
