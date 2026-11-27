@@ -18,7 +18,9 @@ zero. This is intriguing since I finished reading [Countdown to Zero Day](https:
 by Kim Zetter. It was a mind-blowing read, I didn't know how lines of code could be used to sabotage a nuclear-plant which had
 full of heavy mechanics and not exposed to the internet. Since my background is full-stack web development and I learned a
 little bit of embedded system during college, I started from the most familiar part about ICS: the web UI and
-connector integration. I find FUXA as a suitable starting point for me to learn about SCADA software.
+connector integration. I find FUXA as a suitable starting point for me to learn about SCADA software. Instead of following
+tutorial, I'm learning by reading CVE reports. There are 3 CVEs which were related to each other and existed in a single file,
+from missing authentication to a partial security fix, and finally to insufficient JWT validation.
 
 ## Reading CVE Report
 
