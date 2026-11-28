@@ -24,7 +24,7 @@ from missing authentication to a partial security fix, and finally to insufficie
 
 ## Reading CVE Report
 
-The first CVE I was reading on was security bypass vulnerability using path manipulation ([CVE-2026-43945](https://www.cve.org/CVERecord?id=CVE-2026-43945)).
+The first CVE I was reading was authentication bypass vulnerability using path manipulation ([CVE-2026-43945](https://www.cve.org/CVERecord?id=CVE-2026-43945)).
 This could happen when we access a protected endpoint then manipulating the original path of the URL to bypass it. For this case,
 it was endpoint to access [Node-RED](https://nodered.org/) feature to manipulate flows of a project. Node-RED is a low-code
 development tool to build automation or industrial control system. My experience on this tool is very limited, I knew it since
@@ -43,17 +43,18 @@ but also Siemens S7, and other standard industrial protocols. We're focusing on 
 connector.
 
 Accessing the Node-RED feature can be done by calling `/nodered` path. Although there are several paths, we are focusing on crucial
-one, which is `/nodered/flows`. The [endpoint](https://nodered.org/docs/api/admin/methods/post/flows/) `/nodered/flows` deploys
+one, which is `/nodered/flows`. [The endpoint](https://nodered.org/docs/api/admin/methods/post/flows/) is used to deploy
 a flow configuration which may have function nodes that could execute arbitrary server-side JavaScript when triggered. We can
 say *flow* the same as source code in programming but since Node-RED is a low-code visual programming tool, it is called '[flow](https://nodered.org/docs/user-guide/concepts)'.
 
 So what happen in the CVE report is, while the path `/nodered/*` is already protected and requires a credential, it can still be
 bypassed just by modifying the path. Say if we want to create or modify a flow, normally we send a POST request to `/nodered/flows`
-with a body of flow configuration and a credential. Yet in this report, it can bypassed by modifying the path to `/nodered/flows?x=/socket.io`.
+with a body of flow configuration and a credential. Yet in this report, it can be bypassed by modifying the path to `/nodered/flows?x=/socket.io`.
 
-We can test this by pull the container image for version 1.2.11 from https://hub.docker.com/r/frangoteam/fuxa. We also need to
-set the `secureEnabled` setting to `true`. This can be done by mounting volume `/usr/src/app/FUXA/server/_appdata` in container
-to any directory where it has `settings.js` in our local directory. The configuration file should at least have this value:
+We can test this by pulling a container image for version 1.2.11 from https://hub.docker.com/r/frangoteam/fuxa. We also need to
+set the `secureEnabled` setting to `true` to make the endpoints protected. This can be done by mounting volume `/usr/src/app/FUXA/server/_appdata`
+in container to any directory where it has `settings.js` as configuration file in our local directory. The configuration
+file should at least have this value:
 
 ```js
 module.exports = {
@@ -69,7 +70,14 @@ module.exports = {
 }
 ```
 
-Another value we need to look at is `nodeRedEnabled` which enable Node-RED connector, otherwise the endpoint would not exist.
+Here is what the configuration means:
+
+- `secureEnabled`: enable secure mode for FUXA, this include enable protection to some sensitive endpoints
+- `secretCode`: The signing key to sign JWT
+- `tokenExpiresIn`: How long the JWT expire
+- `nodeRedEnabled`: Whether to enable Node-RED connector so it can be accessible through `/nodered/*` endpoint
+- `nodeRedAuthMode`: Protect `/nodered/*` endpoint by requiring credential (JWT or API Key) to access it.
+
 Once the container is running, we can call port 1881 to test it.
 
 ```
@@ -108,8 +116,8 @@ Keep-Alive: timeout=5
 {"code":"unexpected_error","message":"config.forEach is not a function"}
 ```
 
-Well, look at that. We got HTTP 400 now, it doesn't complain about the authentication but missing payload. The exception error
-gives us clue it was failing to iterate an array. Since this endpoint is used to set a flow, we are going to build one
+Well, look at that. We got HTTP 400 now, it doesn't complain about the authentication but missing `config` payload. The exception
+error gives us clue it was failing to iterate an array. Since this endpoint is used to set a flow, we are going to build one
 through API. Let's try to create a flow that executes a code to write a new file. This file will be written in the server
 machine where FUXA is running, in other words, in the container. So let's write it to `/tmp` directory as POC. Here's the
 payload:
@@ -156,7 +164,7 @@ deployed and triggered by 'inject' after 0.1s delay on startup. Save it in a fil
 the POST request. This is the response:
 
 ```
-> curl -iX POST --json @leak.json localhost:1881/nodered/flows?x=/socket.io
+> curl -iX POST --json @payload.json localhost:1881/nodered/flows?x=/socket.io
 HTTP/1.1 204 No Content
 X-Powered-By: Express
 Access-Control-Allow-Methods: GET,PUT,POST,DELETE,OPTIONS
