@@ -8,19 +8,20 @@ date: 2026-11-23
 
 # Amateur Analysis of SCADA Software CVE
 
-I'm experimenting with something beyond my expertise. Exploring a totally new field which I have no prior knowledge about.
-This time I'm reading about Common Vulnerabilities and Exposures (CVE) report in an open-source project I found in Github.
+I'm exploring a totally new field which I have no prior knowledge about. I've been doing full-stack web development since
+college year (about 5 plus years) and now, I'm interested to ICS (Industrial Control System) security. This is intriguing since
+I finished reading [Countdown to Zero Day](https://www.goodreads.com/en/book/show/18465875-countdown-to-zero-day) by Kim Zetter.
+It was a mind-blowing read, I didn't know how lines of code could be used to sabotage a nuclear-plant which had full of heavy
+mechanics and not exposed to the internet.
+
+I'm trying to find a way for me to get hooked into the topic so I don't dive into Modbus protocol or more intricate topic.
+Instead, I'm reading about Common Vulnerabilities and Exposures (CVE) report in an open-source project I found in Github.
 The project that I'm looking at is [FUXA](https://github.com/frangoteam/FUXA). A web-based SCADA (Supervisory Control and
 Data Acquisition) software that allows us to build modern dashboards to monitor connected machines using standard protocols.
 
-I'm interested in this project because I'm currently building my experience in ICS (Industrial Control System) security from
-zero. This is intriguing since I finished reading [Countdown to Zero Day](https://www.goodreads.com/en/book/show/18465875-countdown-to-zero-day)
-by Kim Zetter. It was a mind-blowing read, I didn't know how lines of code could be used to sabotage a nuclear-plant which had
-full of heavy mechanics and not exposed to the internet. Since my background is full-stack web development and I learned a
-little bit of embedded system during college, I started from the most familiar part about ICS: the web UI and
-connector integration. I find FUXA as a suitable starting point for me to learn about SCADA software. Instead of following
-tutorial, I'm learning by reading CVE reports. There are 3 CVEs which were related to each other and existed in a single file,
-from missing authentication to a partial security fix, and finally to insufficient JWT validation.
+I find FUXA as a suitable starting point for me to learn about SCADA software because it is a UI with ExpressJS as the backend.
+There are 3 CVEs which were related to each other and existed in a single file, from missing authentication to a partial security
+fix, and finally to insufficient JWT validation.
 
 ## Reading CVE Report
 
