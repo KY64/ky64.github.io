@@ -240,7 +240,7 @@ in the `x-access-token` header or the `?token=` query parameter. The payload loo
 ```
 
 Let's focus on `groups`, FUXA has an admin group which has value -1 or 255, and guest group that has value 'guest'.
-Guest is basically read-only mode, and anyone can can get a 'guest' token simply by sending POST request to `/api/heartbeat`.
+Guest is basically read-only mode, and anyone can get a 'guest' token simply by sending POST request to `/api/heartbeat`.
 Meanwhile, admin group has full access, including `/nodered/*` endpoint. It requires a login to get it.
 Both groups are signed using the same secret code. The question is, does the server know which group is accessing `/nodered/*`
 endpoint?
