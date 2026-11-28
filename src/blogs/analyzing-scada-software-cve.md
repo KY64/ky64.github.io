@@ -1,7 +1,7 @@
 ---
 layout: 'blog.njk'
 title: Amateur Analysis of SCADA Software CVE
-description: Analyzing three CVEs on SCADA software authentication with a 3rd party integration
+description: "Hands-on analysis of three FUXA SCADA CVEs: reproducing a Node-RED path-manipulation bypass, an auth regression, and a guest JWT that reaches admin endpoints."
 tags: blog
 date: 2026-11-28
 ---
