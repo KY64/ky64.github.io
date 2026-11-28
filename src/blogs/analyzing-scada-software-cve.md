@@ -359,7 +359,7 @@ a code to write a new file but we are adding a new endpoint to retrieve credenti
 ]
 ```
 
-What happen in that payload is, we are adding a new entrypoint with `http in` to trigger a function. The entrypoint is
+What happened in that payload is, we are adding a new entrypoint with `http in` to trigger a function. The entrypoint is
 located at `/leak` but in this case, FUXA will route it to `/dashboard/leak` which is a public endpoint. The function here
 will return a JSON payload that consist information like `secretCode` which is used to sign a JWT, `tokenExpiresIn` to tell
 how long the token expire and `devices` which list the configuration of connected devices. We send this payload to create a
