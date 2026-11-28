@@ -3,7 +3,7 @@ layout: 'blog.njk'
 title: Amateur Analysis of SCADA Software CVE
 description: Analyzing three CVEs on SCADA software authentication with a 3rd party integration
 tags: blog
-date: 2026-11-23
+date: 2026-11-28
 ---
 
 # Amateur Analysis of SCADA Software CVE
@@ -38,7 +38,7 @@ Node-RED itself but in the *connector*, the part which makes it possible for FUX
 FUXA has a monolithic architecture: the client and server run as a single process and are accessed through a single port.
 Although the code component is modular (client and server are different components), it is deployed as a single unit.
 
-![Simplified FUXA client-server architecture](/images/analyzing-scada-software-cve/fuxa-client-server-architecture.png "Figure 1. Simplified Fuxa Client Server Architecture")
+![Diagram showing FUXA's client and server inside Core at localhost:1881, with the server connected to Node-RED.](/images/analyzing-scada-software-cve/fuxa-client-server-architecture.png "Figure 1. Simplified Fuxa Client Server Architecture")
 
 The architecture shown on Figure 1 is a trimmed-down version of the FUXA application architecture. FUXA doesn't just support Node-RED
 but also Siemens S7, and other standard industrial protocols. We're focusing on Node-RED since the CVE is related to this
@@ -179,7 +179,7 @@ Keep-Alive: timeout=5
 
 Well, well, well. Looks like something just happened. Let's look at http://localhost:1881/flows to check the created flow.
 
-![Flow created after the path-manipulation bypass](/images/analyzing-scada-software-cve/created-flow-after-path-manipulation.png "Figure 2. Created Flow After Bypassing Through Path Manipulation")
+![Node-RED editor showing an inject node connected to a function node that writes a proof marker to /tmp/fuxa-rce-proof.txt.](/images/analyzing-scada-software-cve/created-flow-after-path-manipulation.png "Figure 2. Created Flow After Bypassing Through Path Manipulation")
 
 We can see the flow is created and the function matches with the payload we sent before. Let's see what's in the `/tmp` directory.
 
@@ -250,7 +250,7 @@ to verify the JWT signature as a way to check whether a request is allowed or no
 signed using the same secret code, both had the same valid signature. In other words, any valid JWT can be used to access
 `/nodered/*` endpoint regardless of the groups. This is what [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443) is all about.
 
-![](/images/analyzing-scada-software-cve/fuxa-authentication-flow.png "Figure 3. FUXA Node-RED Endpoint Authentication Flow")
+![Flowchart showing POST /nodered/flows checking whether the JWT is valid: an invalid token gets HTTP 401, while a valid token sets the flows.](/images/analyzing-scada-software-cve/fuxa-authentication-flow.png "Figure 3. FUXA Node-RED Endpoint Authentication Flow")
 
 In Figure 3, we can see how the authentication flow works, it only checks whether the JWT signature is valid. Let's try getting
 the guest token first, make sure we test this on image `docker.io/frangoteam/fuxa:1.3.2`
@@ -403,7 +403,7 @@ odd since any group other than guest can access this endpoint. Apparently after 
 improved it by checking if the group is part of admin, and return HTTP 403 if not. Figure below is the new improved authentication
 flow
 
-![](/images/analyzing-scada-software-cve/fuxa-refined-authentication-flow.png "Figure 4. Improved FUXA Node-RED Endpoint Authentication Flow")
+![Flowchart showing POST /nodered/flows checking JWT validity, decoding its payload, and requiring the admin group before setting flows; failed checks return HTTP 401.](/images/analyzing-scada-software-cve/fuxa-refined-authentication-flow.png "Figure 4. Improved FUXA Node-RED Endpoint Authentication Flow")
 
 This should be enough to protect the Node-RED endpoint.
 
