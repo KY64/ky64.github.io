@@ -220,8 +220,8 @@ and API access.*" that was stated in the summary.
 
 Seems the authentication was thought to be a blocker so it was disabled for convenience, yet later it was considered as vulnerability (of course!)
 and added in CVE report. Solving a bug by removing authentication is a bug. We can reproduce the vulnerability using the same step like we did on
-path manipulation. Except this time we can omit `?x=/socket.io`. Just sending the payload to `/nodered/flows` and make it executes
-arbitrary code.
+path manipulation. Except this time we can omit `?x=/socket.io` and test it on container image prior to version 1.2.11 (e.g. 1.2.8).
+Just sending the payload to `/nodered/flows` and make it executes arbitrary code.
 
 ### A Guest Coming From Backdoor
 
