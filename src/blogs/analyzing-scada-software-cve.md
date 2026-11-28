@@ -192,7 +192,7 @@ FILE content: FUXA labproof
 
 There it is, we just executed a code inside the server after bypassing the security by manipulating the path. This is the reported
 vulnerability in [CVE-2026-43945](https://www.cve.org/CVERecord?id=CVE-2026-43945). This vulnerability is introduced by [PR #2182](https://github.com/frangoteam/FUXA/pull/2182)
-which added authentication to `/nodered/*` endpoint but missed to properly handle `/dashboard` and `/socket.io` path. This
+which added authentication to `/nodered/*` endpoint but intentionally excluding `/dashboard` (since it means to be public) and `/socket.io`. This
 piece of code executed before the authentication happens,
 
 ```js
@@ -200,10 +200,10 @@ const url = req.originalUrl || req.url || req.path;
 if (url.includes('/dashboard') || url.includes('/socket.io')) return next();
 ```
 
-Since `req.originalUrl` is retaining the original URL, the path that was assume to be `/dashboard` and `/socket.io` as valid was
-actually consider `/nodered/flows?x=/socket.io` to be valid also. When this match, the code skip the authentication part on
-the next line and proceed to process the request. The solution is it shouldn't include the query parameter at all but only the
-path, hence on [PR #2660](https://github.com/frangoteam/FUXA/pull/2260/files) it replaces it with `req.baseUrl`.
+Since `req.originalUrl` includes the query string like `?x=/socket.io`, the code detects `/socket.io` string and considered
+it to be valid. Due to this, the code skip the authentication part on the next line and proceed to process the request. The
+solution to this problem is, it shouldn't include the query string at all but only the path, hence on
+[PR #2660](https://github.com/frangoteam/FUXA/pull/2260) it replaces it with `req.baseUrl`.
 
 I wonder, how come this vulnerability exists? what was the change that introduced this? It turned out, if we look again at [PR #2182](https://github.com/frangoteam/FUXA/pull/2182)
 and check the vulnerability report, that PR was created to patch another vulnerability, [CVE-2026-25938](https://www.cve.org/CVERecord?id=CVE-2026-25938).
@@ -245,7 +245,7 @@ So anyone can get it. While admin group has full access, including `/nodered/*` 
 Both groups are signed using the same secret code. The question is, does the server know which group is accessing `/nodered/*`
 endpoint?
 
-When PR #2660 was merged to protect `/nodered/*` endpoint, it reused function to verify the JWT signature as a way to check
+When PR [PR #2660](https://github.com/frangoteam/FUXA/pull/2260) was merged to protect `/nodered/*` endpoint, it reused function to verify the JWT signature as a way to check
 whether a request is allowed or not. However, since both admin and guest JWT were signed using the same secret code, both had
 the same valid signature. In other words, any valid JWT can be used to access `/nodered/*` endpoint regardless of the groups.
 This is what [CVE-2026-67443](https://www.cve.org/CVERecord?id=CVE-2026-67443) is all about.
