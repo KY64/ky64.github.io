@@ -26,11 +26,12 @@ fix, and finally to insufficient JWT validation.
 ## Reading CVE Report
 
 The first CVE I was reading was authentication bypass vulnerability using path manipulation ([CVE-2026-43945](https://www.cve.org/CVERecord?id=CVE-2026-43945)).
-This could happen when we access a protected endpoint then manipulating the original path of the URL to bypass it. For this case,
-it was endpoint to access [Node-RED](https://nodered.org/) feature to manipulate flows of a project. Node-RED is a low-code
-development tool to build automation or industrial control system. My experience on this tool is very limited, I knew it since
-one of my friend in the past used this to prototype his final project in college. However, the vulnerability here is not on
-the Node-RED but the *connector*, the part which makes it possible for FUXA to integrate with Node-RED.
+This CVE appears because of partial security fix which I will explain later. This vulnerability happens when we access a
+protected endpoint then manipulating the original path of the URL to bypass it. For this case, it was endpoint to access
+[Node-RED](https://nodered.org/) feature to manipulate flows of a project. Node-RED is a low-code development tool to build
+automation or industrial control system. My experience on this tool is very limited, I knew it since one of my friend in the
+past used this to prototype his final project in college. However, the vulnerability here is not on the Node-RED but the
+*connector*, the part which makes it possible for FUXA to integrate with Node-RED.
 
 ### Path Manipulation Vulnerability
 
